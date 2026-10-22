@@ -5,7 +5,7 @@ import { mkdir,writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnvFile } from 'node:process';
-import { validateInquiry,makeLimiter } from './server/inquiries.mjs';
+import { validateInquiry,makeLimiter,assertMailConfigured } from './server/inquiries.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 try{loadEnvFile(path.join(root,'.env'))}catch(error){if(error.code!=='ENOENT')throw error}
@@ -18,7 +18,7 @@ app.use((req,res,next)=>{
   next();
 });
 app.use('/api',express.json({limit:'16kb'}));
-const mailReady=Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS && process.env.INQUIRY_TO && process.env.MAIL_FROM);
+const mailReady=assertMailConfigured(process.env);
 const transport=mailReady ? nodemailer.createTransport({host:process.env.SMTP_HOST,port:Number(process.env.SMTP_PORT||587),secure:process.env.SMTP_PORT==='465',auth:{user:process.env.SMTP_USER,pass:process.env.SMTP_PASS}}):null;
 const allow=makeLimiter();
 app.get('/api/config',(_req,res)=>res.json({inquiryMode:mailReady?'email':'preview',publicEmail:process.env.PUBLIC_EMAIL||'',publicPhone:process.env.PUBLIC_PHONE||''}));
@@ -32,7 +32,7 @@ app.post('/api/inquiries',async(req,res)=>{
   const reference=randomUUID();
   try {
     if(transport) {
-      await transport.sendMail({from:process.env.MAIL_FROM,to:process.env.INQUIRY_TO,replyTo:value.email,subject:`Atlas website inquiry: ${value.service}`,text:`Name: ${value.name}\nEmail: ${value.email}\nService: ${value.service}\n\n${value.message}\n\nConsent: Contact about this inquiry only.\nReference: ${reference}`});
+      await transport.sendMail({from:process.env.MAIL_FROM,to:process.env.INQUIRY_TO,replyTo:value.email,subject:`Atlas website inquiry: ${value.service}`,text:`Name: ${value.name}\nEmail: ${value.email}\nPhone: ${value.phone||'not provided'}\nService: ${value.service}\n\n${value.message}\n\nConsent: Contact about this inquiry only.\nSMS consent: ${value.smsConsent?'yes — may be texted':'no — do not text'}\nReference: ${reference}`});
       return res.status(201).json({mode:'email',message:'Your inquiry has been sent. Atlas will follow up using the email you provided.'});
     }
     await mkdir(path.join(root,'data','inquiries'),{recursive:true,mode:0o700});
@@ -44,7 +44,7 @@ app.post('/api/inquiries',async(req,res)=>{
 });
 app.use('/api',(_req,res)=>res.status(404).json({error:'Not found.'}));
 if(process.env.NODE_ENV==='production') {
-  const routes=['/','/properties','/insurance','/mortgage','/construction','/about','/contact','/privacy','/accessibility'];
+  const routes=['/','/properties','/insurance','/mortgage','/construction','/about','/contact','/privacy','/terms','/accessibility'];
   for(const [from,to] of Object.entries({'/real-estate':'/properties','/mortgages':'/mortgage'}))app.get(from,(_req,res)=>res.redirect(301,to));
   for(const route of routes)app.get(route,(_req,res)=>res.sendFile(path.join(root,'dist',route,'index.html')));
   app.use(express.static(path.join(root,'dist'),{maxAge:'1h',redirect:false}));

@@ -67,7 +67,7 @@ export function Footer(){return <footer className="site-footer"><div className="
  <div className="footer-main"><div className="footer-brand"><Link to="/" aria-label="Atlas Group home"><Logo inverse/></Link><p>A clearer way forward.</p></div>
  <div className="footer-links"><p className="label">Our companies</p>{divisions.map(d=><Link key={d.slug} to={`/${d.slug}`}>{d.brand}</Link>)}</div>
  <div className="footer-links"><p className="label">Atlas</p><Link to="/#approach">Our approach</Link><Link to="/about">About Atlas</Link><Link to="/contact">Contact</Link></div></div>
- <div className="footer-bottom"><span>Metro Detroit. Serving Michigan.</span><div><Link to="/privacy">Privacy</Link><Link to="/accessibility">Accessibility</Link><span>© {new Date().getFullYear()} Atlas Group</span></div></div>
+ <div className="footer-bottom"><span>Metro Detroit. Serving Michigan.</span><div><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link><Link to="/accessibility">Accessibility</Link><span>© {new Date().getFullYear()} Atlas Group</span></div></div>
  <p className="image-disclosure">Atlas Properties, Atlas Insurance, Atlas Mortgage, and Atlas Construction are affiliated companies of Atlas Group, the next chapter of Atlas Properties Plus. You are never required to use more than one. Equal Housing Opportunity. Imagery is illustrative and does not depict available listings or completed Atlas projects.</p>
  </div></footer>}
 
@@ -82,7 +82,7 @@ export function ContactSection({initialService='Not sure yet',standalone=false}:
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();const fd=new FormData(e.currentTarget);setStatus('sending');setFeedback('');
   try{
-   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),service:fd.get('service'),message:fd.get('message'),consent:fd.get('consent')==='on',website:fd.get('website')})});
+   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website')})});
    const result=await response.json();if(!response.ok)throw new Error(result.error||'Something went wrong. Please try again.');
    setStatus('success');setFeedback(result.message);
    requestAnimationFrame(()=>statusRef.current?.focus());
@@ -94,10 +94,14 @@ export function ContactSection({initialService='Not sure yet',standalone=false}:
   </div>
   <div className="form-wrap">{status==='success'?<div className="form-success" ref={statusRef} tabIndex={-1} role="status"><Check size={36} strokeWidth={1.5}/><h3>{config?.inquiryMode==='preview'?'Your preview inquiry is saved.':'Your next chapter starts here.'}</h3><p>{feedback}</p><button className="button button-white" onClick={()=>{setStatus('idle');setFeedback('')}}>Start another inquiry<ArrowRight size={20}/></button></div>:<form ref={formRef} onSubmit={submit}>
    <div className="form-pair"><label>Name<input name="name" autoComplete="name" required maxLength={100} placeholder="Your name"/></label><label>Email<input name="email" autoComplete="email" type="email" required maxLength={254} placeholder="you@example.com"/></label></div>
+   <label>Phone <span className="optional">(optional)</span><input name="phone" autoComplete="tel" type="tel" maxLength={20} placeholder="(313) 555-0100"/></label>
    <label>What can we help with?<span className="select-wrap"><select name="service" value={selected} onChange={e=>setSelected(e.target.value)} required>{divisions.map(d=><option key={d.service} value={d.service}>{d.service} — {d.brand}</option>)}<option>Not sure yet</option></select><ChevronDown size={18}/></span></label>
    <label>Your message<textarea name="message" rows={3} required maxLength={3000} placeholder="A little about your plans and timeline…"/></label>
    <div className="honey" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
    <label className="consent"><input type="checkbox" name="consent" required/><span>I agree to be contacted about this inquiry and have read the <Link to="/privacy">privacy notice</Link>.</span></label>
+   {/* A2P 10DLC: this checkbox must never be `required`. Carriers reject the
+       business registration if SMS opt-in is needed to submit the form. */}
+   <label className="consent"><input type="checkbox" name="smsConsent"/><span>By providing your phone number, you agree to receive calls and text messages from Atlas Insurances LLC about life insurance services. Msg &amp; data rates may apply. Message frequency varies. Reply STOP to unsubscribe or HELP for help. See our <Link to="/privacy">Privacy Policy</Link> and <Link to="/terms">Terms</Link>.</span></label>
    <button className="button button-white submit-button" type="submit" disabled={!config||status==='sending'}>{status==='sending'?<>Saving your inquiry<LoaderCircle className="spinner" size={20}/></>:<>Start a conversation<ArrowUpRight size={23}/></>}</button>
    <p className="form-note">Please don’t include account numbers, medical details, or other sensitive information.</p>
    {config?.inquiryMode==='preview'&&<p className="preview-note">Website preview: inquiries are saved locally and are not sent to Atlas yet.</p>}
