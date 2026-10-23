@@ -43,6 +43,29 @@ test('the privacy notice refuses to sell phone numbers', () => {
   assert.match(pages, /do not sell, rent, or share your phone number/);
 });
 
+/* GHL's A2P checklist requires the registered brand's legal name, address, phone and
+   email to be visible on the website, and requires that NO other phone/SMS-consent form
+   exists on any page carrying the chat widget. Both are attestations we ticked, so a
+   later edit that quietly drops them would make the filing false with nothing failing. */
+const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+
+test('the footer publishes the brand details carriers verify', () => {
+  for (const required of [
+    'Atlas Insurances LLC',              // must match the EIN record exactly
+    '8409 Fenton St',
+    'Dearborn Heights, MI 48127',
+    '+13135133017',
+    'info@atlasgroupmi.com',
+  ]) assert.ok(form.includes(required), `the footer no longer publishes: ${required}`);
+});
+
+test('the chat widget is kept off every page that has the sms consent form', () => {
+  const blocked = indexHtml.match(/var BLOCKED = \[([^\]]*)\]/)?.[1] ?? '';
+  for (const route of ["'/'", "'/about'", "'/contact'"])
+    assert.ok(blocked.includes(route), `ContactSection renders on ${route}, so the widget must be blocked there`);
+  assert.match(indexHtml, /data-widget-id/, 'the chat widget loader is missing entirely');
+});
+
 test('both legal pages carry the required sms terms', () => {
   for (const required of [
     'wireless provider',              // who to ask about a text plan

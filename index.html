@@ -14,8 +14,40 @@
     <title>Atlas Group — Your next chapter. Built together.</title>
   </head>
   <body><noscript><style>.reveal{opacity:1!important;transform:none!important}</style><p style="padding:12px 24px;font:14px sans-serif">You can browse Atlas without JavaScript. Enable it to use the inquiry form and interactive features.</p></noscript><div id="root"></div><script type="module" src="/src/main.tsx"></script>
-    <!-- GoHighLevel chat widget: this is the SMS opt-in mechanism declared on the A2P
-         campaign registration. Carriers verify it is present on the registered URL. -->
-    <script src="https://widgets.leadconnectorhq.com/loader.js" data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js" data-widget-id="6adbe4c4efcd72a99d8548a8" data-source="WEB_USER"></script>
+    <!-- GoHighLevel chat widget: the SMS opt-in mechanism declared on the A2P campaign
+         (registered URL: /insurance). The A2P attestation requires that NO other form
+         collecting phone numbers or SMS consent exists on any page carrying this widget,
+         so it is kept off the three pages that render ContactSection, which has its own
+         smsConsent checkbox. Changing WIDGET_BLOCKED without re-reading that attestation
+         will make the registration false. See tests/a2p-compliance.test.mjs. -->
+    <script>
+      (function () {
+        var BLOCKED = ['/', '/about', '/contact'];
+        var ID = 'ghl-chat-widget';
+        function path() { return (location.pathname.replace(/\/+$/, '') || '/'); }
+        function remove() {
+          var s = document.getElementById(ID);
+          if (s) s.remove();
+          document.querySelectorAll('[id*="lc_"],[class*="leadconnector"],chat-widget').forEach(function (el) { el.remove(); });
+        }
+        function sync() {
+          if (BLOCKED.indexOf(path()) !== -1) { remove(); return; }
+          if (document.getElementById(ID)) return;
+          var s = document.createElement('script');
+          s.id = ID;
+          s.src = 'https://widgets.leadconnectorhq.com/loader.js';
+          s.setAttribute('data-resources-url', 'https://widgets.leadconnectorhq.com/chat-widget/loader.js');
+          s.setAttribute('data-widget-id', '6adbe4c4efcd72a99d8548a8');
+          s.setAttribute('data-source', 'WEB_USER');
+          document.body.appendChild(s);
+        }
+        ['pushState', 'replaceState'].forEach(function (m) {
+          var orig = history[m];
+          history[m] = function () { var r = orig.apply(this, arguments); sync(); return r; };
+        });
+        window.addEventListener('popstate', sync);
+        sync();
+      })();
+    </script>
   </body>
 </html>
