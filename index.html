@@ -16,6 +16,39 @@
     <link rel="icon" type="image/svg+xml" href="/brand/atlas-symbol-blue.svg" />
     <link rel="preload" as="image" href="/media/hero-home.webp" />
     <title>Atlas Group — Your next chapter. Built together.</title>
+    <!-- Meta pixel, dataset "Atlas Group Website" (1509881880899534), owned by the Atlas
+         Group business portfolio. The privacy notice's "Cookies and measurement" section
+         is the disclosure for this; removing that section without removing this would
+         make the notice wrong. -->
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1509881880899534');
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" alt=""
+      src="https://www.facebook.com/tr?id=1509881880899534&ev=PageView&noscript=1" /></noscript>
+    <!-- React Router never reloads the document, so the snippet above would only ever
+         count the first page of a visit. Re-fire PageView on each client-side route
+         change, or /insurance looks like it gets no traffic. -->
+    <script>
+      (function () {
+        var last = location.pathname;
+        function view() {
+          if (location.pathname === last) return;
+          last = location.pathname;
+          if (window.fbq) fbq('track', 'PageView');
+        }
+        ['pushState', 'replaceState'].forEach(function (m) {
+          var orig = history[m];
+          history[m] = function () { var r = orig.apply(this, arguments); view(); return r; };
+        });
+        window.addEventListener('popstate', view);
+      })();
+    </script>
   </head>
   <body><noscript><style>.reveal{opacity:1!important;transform:none!important}</style><p style="padding:12px 24px;font:14px sans-serif">You can browse Atlas without JavaScript. Enable it to use the inquiry form and interactive features.</p></noscript><div id="root"></div><script type="module" src="/src/main.tsx"></script>
     <!-- GoHighLevel chat widget: the SMS opt-in mechanism declared on the A2P campaign
