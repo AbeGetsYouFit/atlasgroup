@@ -66,6 +66,15 @@ test('the chat widget is kept off every page that has the sms consent form', () 
   assert.match(indexHtml, /data-widget-id/, 'the chat widget loader is missing entirely');
 });
 
+/* Meta verifies the domain by scraping this tag from the static head. If it moves into a
+   React-rendered head or is dropped, Meta un-verifies atlasgroupmi.com and the pixel and
+   lead-ad permissions go with it — silently, while the site keeps working. */
+test('the meta domain verification tag stays in the static head', () => {
+  const head = indexHtml.slice(indexHtml.indexOf('<head>'), indexHtml.indexOf('</head>'));
+  assert.match(head, /name="facebook-domain-verification"[^>]*content="buws3kk4nrk6z6vr1khfmr1h5qqrgn"/,
+    'the Meta domain verification tag is missing from the static <head>');
+});
+
 test('both legal pages carry the required sms terms', () => {
   for (const required of [
     'wireless provider',              // who to ask about a text plan
