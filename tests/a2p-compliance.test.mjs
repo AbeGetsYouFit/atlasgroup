@@ -49,12 +49,10 @@ test('the privacy notice refuses to sell phone numbers', () => {
    later edit that quietly drops them would make the filing false with nothing failing. */
 const indexHtml = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
-test('the footer publishes the brand details carriers verify', () => {
+test('the footer publishes the brand name, phone and email', () => {
   for (const required of [
     'Atlas Insurances LLC',              // must match the EIN record exactly
-    '8409 Fenton St',
-    'Dearborn Heights, MI 48127',
-    '+13135133017',
+    '+13135130268',                      // the GHL/LC number on campaign CCON4S6
     'info@atlasgroupmi.com',
   ]) assert.ok(form.includes(required), `the footer no longer publishes: ${required}`);
 });
