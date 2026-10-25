@@ -30,7 +30,7 @@
 @media(max-width:480px){.book-page{padding-block:55px 75px}.book-page h1{font-size:38px}.book-page iframe{min-height:860px}}
 /* ---- insurance page (redesign 2026-10) ---- */
 .ins-hero{background:#14263d;background-image:radial-gradient(900px 420px at 85% 20%,rgba(50,104,245,.35),transparent 60%),radial-gradient(600px 380px at 10% 95%,rgba(50,104,245,.18),transparent 60%);color:#fff;padding-block:110px 100px}
-.ins-hero h1{font-family:'Montserrat','Manrope',sans-serif;font-weight:700;font-size:clamp(44px,5.5vw,76px);line-height:1.1;letter-spacing:-.015em}
+.ins-hero h1{font-family:'Jost','Manrope',sans-serif;font-weight:600;font-size:clamp(44px,5.5vw,76px);line-height:1.1;letter-spacing:-.015em}
 .ins-hero .eyebrow{color:#8fb0ff}
 .ins-lead{font-size:18px;line-height:1.7;color:#c6d2e4;max-width:56ch;margin:26px 0 34px}
 .ins-hero-btns{display:flex;gap:14px;flex-wrap:wrap}
@@ -43,7 +43,7 @@
 @media(prefers-reduced-motion:reduce){.carrier-track{animation:none}}
 .carrier-tile{border:1px solid var(--line);border-radius:10px;background:#fff;min-height:54px;display:flex;align-items:center;justify-content:center;padding:0 22px}
 .carrier-tile img{max-height:38px;max-width:170px;object-fit:contain;display:block}
-.ins-sec h2{font-family:'Montserrat','Manrope',sans-serif;font-weight:700;font-size:clamp(32px,3.6vw,50px);line-height:1.12;letter-spacing:-.015em}
+.ins-sec h2{font-family:'Jost','Manrope',sans-serif;font-weight:600;font-size:clamp(32px,3.6vw,50px);line-height:1.12;letter-spacing:-.015em}
 .ins-sec.alt{background:var(--soft)}
 .ins-sub{font-size:16px;color:var(--muted);line-height:1.65;max-width:62ch;margin:22px 0 40px}
 .pro-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
@@ -51,7 +51,7 @@
 .pro-card-cta{background:#eef3fe;border-color:#d4e0fb}
 .pro-tag{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);background:#eef3fe;border-radius:99px;padding:4px 11px;width:fit-content}
 .pro-card-cta .pro-tag{background:#fff}
-.pro-card h3{font-family:'Montserrat','Manrope',sans-serif;font-size:21px;font-weight:700;margin-top:4px}
+.pro-card h3{font-family:'Jost','Manrope',sans-serif;font-size:22px;font-weight:600;margin-top:4px}
 .pro-who{font-size:13px;font-weight:700;color:var(--ink)}
 .pro-card p:not(.pro-who){font-size:14px;line-height:1.65;color:var(--muted)}
 .indep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;margin-top:34px}
@@ -67,6 +67,6 @@
 .you-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 @media(max-width:900px){.you-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}}
 .you-chip{border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:11px;padding:18px 20px;background:#fff}
-.you-chip span{display:block;font-family:'Montserrat','Manrope',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.you-chip span{display:block;font-family:'Jost','Manrope',sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px}
 .you-chip p{font-size:13.5px;color:var(--muted);line-height:1.55}
 .you-note{font-size:15px;color:var(--ink);line-height:1.65;max-width:62ch;margin-top:28px;font-weight:600}
