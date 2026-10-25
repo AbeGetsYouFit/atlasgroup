@@ -60,8 +60,69 @@ function ServiceExplorer(){
 function Approach(){return <section className="approach-section" id="approach" aria-labelledby="approach-title"><div className="approach-image"><img src={asset("/media/neighborhood.webp")} width="800" height="1100" alt="Illustrative leafy Michigan street with brick homes and welcoming porches" loading="lazy"/></div><div className="approach-content reveal"><p className="eyebrow">Our approach</p><h2 id="approach-title">Forward thinking.<br/>Michigan grounded.</h2><p className="approach-intro">Atlas brings property, protection, financing, and building into one conversation, with a Michigan license behind each one. Local experience. A clearer way forward.</p><ol className="steps">{steps.map((step,i)=><li key={step.title}><span className="step-number">0{i+1}</span><div><h3>{step.title}</h3><p>{step.body}</p></div></li>)}</ol><TextLink to="/about">Meet Atlas</TextLink></div></section>}
 function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Founder compact/><ContactSection/></>}
 
+/* Carrier strip stays off until the lineup is verified against Adam's appointment list
+   and each carrier's logo-use rules; flip to true when that list is confirmed. */
+const SHOW_CARRIERS=false;
+const carriers:[string,string][]=[['mutual-of-omaha.png','Mutual of Omaha'],['aig.png','AIG'],['transamerica.png','Transamerica'],['gerber.png','Gerber Life'],['foresters.png','Foresters Financial'],['americo.png','Americo'],['aetna.svg','Aetna'],['prosperity.png','Prosperity Life'],['royal-neighbors.png','Royal Neighbors of America'],['american-amicable.png','American Amicable']];
+const protections=[
+ {tag:'Most affordable',title:'Income Replacement',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
+ {tag:'Never expires',title:'Lifetime Legacy',who:'Leave something behind, guaranteed',body:'Permanent protection with a payout whenever that day comes, payments that never rise, and a value that quietly grows over time — something you can even borrow against in life.'},
+ {tag:'No medical exam options',title:'Final Expense',who:'Ease the goodbye',body:'Smaller, permanent protection sized to funeral and end-of-life costs, so grief never comes with a bill. Simple health questions — many options skip the medical exam entirely.'},
+ {tag:'Keeps the home',title:'Mortgage Protection',who:'The roof stays over their heads',body:'Protection matched to your mortgage, so if something happens to you, the house gets paid off — and your family keeps their home, not a payment book.'},
+ {tag:'Protect & grow',title:'Protection That Builds',who:'Cover today, build for tomorrow',body:'Flexible, permanent protection that also builds a cash value tied to a market index — growth potential with downside limits. For people thinking about protection and the long game together.'},
+];
+const insFaq=[
+ {q:'What does protection like this cost?',a:'It depends on your age, health, the amount, and how long you want it — which is why no honest website quotes you a number. Coverage can start at around a dollar a day; your agent puts real numbers together on the call, and there’s no fee for the conversation.'},
+ {q:'Do I need a medical exam?',a:'Often not. Many options use a few health questions instead of an exam — especially final expense coverage. Your agent will tell you exactly what the options in your situation require before anything moves forward.'},
+ {q:'How fast can coverage start?',a:'Most coverage can begin quickly once approved — for some no-exam options, that can be days, not months.'},
+ {q:'I already have a policy. Should I still call?',a:'Yes — that’s what a free policy review is for. People often find they can get more protection for a similar budget. Your agent will never advise canceling anything until a better arrangement is actually in place.'},
+ {q:'Does booking a call commit me to anything?',a:'No. The call is a conversation with a licensed agent, not an application. Nothing is bound, charged, or signed because you booked a time.'},
+];
+function InsurancePage(){
+ return <>
+  <section className="ins-hero"><div className="container">
+   <p className="eyebrow">Atlas Insurance</p>
+   <h1>Protection for those<br/>that matter most.</h1>
+   <p className="ins-lead">Atlas Insurance is an independent agency built on one promise: protect the people who count on you — the house, the paychecks, the goodbyes — plainly explained, honestly priced, and handled over a simple phone call with a licensed agent.</p>
+   <div className="ins-hero-btns"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={22}/></Link><a className="button button-ghost" href="#ask">Ask a question</a></div>
+  </div></section>
+  {SHOW_CARRIERS&&<section className="carrier-band"><p className="carrier-label">Appointed with 50+ trusted carriers</p><div className="carrier-track">{[...carriers,...carriers].map(([f,n],i)=><span className="carrier-tile" key={i}><img src={asset(`/carriers/${f}`)} alt={i<carriers.length?n:''} loading="lazy"/></span>)}</div></section>}
+  <section className="ins-sec container section-pad">
+   <p className="eyebrow">What we protect</p>
+   <h2>Five things worth protecting.<br/>One conversation to cover them.</h2>
+   <p className="ins-sub">Every family’s answer is different. These are the protections — your agent helps you match one (or a mix) to your people, your budget, and your stage of life.</p>
+   <div className="pro-grid">
+    {protections.map(p=><article className="pro-card" key={p.title}><span className="pro-tag">{p.tag}</span><h3>{p.title}</h3><p className="pro-who">{p.who}</p><p>{p.body}</p></article>)}
+    <article className="pro-card pro-card-cta"><span className="pro-tag">Not sure?</span><h3>That’s the call.</h3><p className="pro-who">15–30 minutes, no pressure</p><p>Tell the agent about your people and your budget. They’ll lay out what fits — in plain words, with real numbers — and you decide. Coverage can start around a dollar a day.</p></article>
+   </div>
+  </section>
+  <section className="ins-sec alt"><div className="container section-pad">
+   <p className="eyebrow">Why Atlas</p>
+   <h2>Independent, on purpose.</h2>
+   <p className="ins-sub">A captive agent can only sell you one company’s products. An independent agency works the other way around — we start from your situation and shop it across carriers.</p>
+   <div className="indep-grid">
+    <div className="indep-item"><h3>We work for you, not a carrier</h3><p>Atlas compares options from multiple top-rated insurance carriers and brings you the ones that actually fit — your health, your budget, your timeline.</p></div>
+    <div className="indep-item"><h3>Licensed where you live</h3><p>Atlas Insurance and its producers are licensed in states across the country — your agent confirms availability where you live on the call.</p></div>
+    <div className="indep-item"><h3>Principal-led, not a call center</h3><p>The person on your call is a licensed producer whose name is on the door. Your situation is handled by the people accountable for it — start to finish.</p></div>
+   </div>
+  </div></section>
+  <section className="ins-sec container section-pad">
+   <p className="eyebrow">How it works</p>
+   <h2>Three steps. No paperwork maze.</h2>
+   <div className="ins-steps">
+    <div className="ins-step"><span className="step-number">01</span><h3>Book your Atlas call</h3><p>Pick a time that suits you — as soon as today or tomorrow. A licensed agent calls you. No links, no video.</p></div>
+    <div className="ins-step"><span className="step-number">02</span><h3>Talk it through</h3><p>Your family, your budget, your questions. The agent compares options across the carriers and puts real numbers together.</p></div>
+    <div className="ins-step"><span className="step-number">03</span><h3>Covered, simply</h3><p>Many options need just a few health questions — no medical exam — and most coverage can begin quickly once approved.</p></div>
+   </div>
+   <Link className="button ins-book-btn" to="/book">Book your call now<ArrowUpRight size={22}/></Link>
+  </section>
+  <div id="ask"><ContactSection initialService="Insurance"/></div>
+  <section className="faq-section container section-pad"><div><p className="eyebrow">Good questions</p><h2>Things families actually ask.</h2></div><div className="faq-list">{insFaq.map(q=><details key={q.q}><summary>{q.q}<Plus size={20} strokeWidth={1.5}/></summary><p>{q.a}</p></details>)}<p className="service-note">Coverage availability and terms depend on the insurer, eligibility, and underwriting. A website inquiry or phone call does not bind coverage.</p></div></section>
+  <section className="compact-cta"><div className="container"><h2>The best time is<br/>before you need it.</h2><Link className="button button-white" to="/book">Book your Atlas call<ArrowUpRight size={23}/></Link></div></section>
+ </>;
+}
 function DivisionPage(){
- const {slug}=useParams();const d=divisions.find(d=>d.slug===slug);if(!d)return <NotFound/>;
+ const {slug}=useParams();if(slug==='insurance')return <InsurancePage/>;const d=divisions.find(d=>d.slug===slug);if(!d)return <NotFound/>;
  return <><section className="detail-hero container"><div><Link to="/#services" className="breadcrumb">The Atlas companies <span>/</span> {d.brand}</Link><Lockup division={d} className="detail-lockup"/><h1>{d.heading.split('\n').map(line=><span key={line}>{line} </span>)}</h1><p>{d.intro}</p>{d.slug==='insurance'?<Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={22}/></Link>:<Link className="button" to={`/contact?service=${encodeURIComponent(d.service)}`}>Let’s talk {d.service.toLowerCase()}<ArrowUpRight size={22}/></Link>}</div><figure><img src={asset(`/media/${d.image}.webp`)} alt={d.alt} width="800" height="900"/><figcaption>Space for what comes next.</figcaption></figure></section>
   <section className="offering-section section-pad"><div className="container offering-layout"><div className="reveal"><p className="eyebrow">{d.brand}</p><h2>Your plans.<br/>Our starting point.</h2></div><div>{d.areas.map((a,i)=><article className="offering-row reveal" key={a.title}><span className="service-number">0{i+1}</span><div><h3>{a.title}</h3><p>{a.body}</p></div></article>)}</div></div></section>
   <section className="faq-section container section-pad"><div className="reveal"><p className="eyebrow">A little clarity</p><h2>Good questions.<br/>A better beginning.</h2></div><div className="faq-list">{d.questions.map(q=><details key={q.q}><summary>{q.q}<Plus size={20} strokeWidth={1.5}/></summary><p>{q.a}</p></details>)}{d.note&&<p className="service-note">{d.note}</p>}</div></section>
