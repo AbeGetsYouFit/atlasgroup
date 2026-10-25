@@ -61,8 +61,8 @@ function Approach(){return <section className="approach-section" id="approach" a
 function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Founder compact/><ContactSection/></>}
 
 /* Carrier strip stays off until the lineup is verified against Adam's appointment list
-   and each carrier's logo-use rules; flip to true when that list is confirmed. */
-const SHOW_CARRIERS=false;
+   and each carrier's logo-use rules; switched on 2026-10-25 at the owner’s direction; adjust the lineup when that list is confirmed. */
+const SHOW_CARRIERS=true;
 const carriers:[string,string][]=[['mutual-of-omaha.png','Mutual of Omaha'],['aig.png','AIG'],['transamerica.png','Transamerica'],['gerber.png','Gerber Life'],['foresters.png','Foresters Financial'],['americo.png','Americo'],['aetna.svg','Aetna'],['prosperity.png','Prosperity Life'],['royal-neighbors.png','Royal Neighbors of America'],['american-amicable.png','American Amicable']];
 const protections=[
  {tag:'Most affordable',title:'Income Replacement',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
@@ -87,6 +87,20 @@ function InsurancePage(){
    <div className="ins-hero-btns"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={22}/></Link><a className="button button-ghost" href="#ask">Ask a question</a></div>
   </div></section>
   {SHOW_CARRIERS&&<section className="carrier-band"><p className="carrier-label">Appointed with 50+ trusted carriers</p><div className="carrier-track">{[...carriers,...carriers].map(([f,n],i)=><span className="carrier-tile" key={i}><img src={asset(`/carriers/${f}`)} alt={i<carriers.length?n:''} loading="lazy"/></span>)}</div></section>}
+  <section className="ins-sec container section-pad">
+   <p className="eyebrow">Built around you</p>
+   <h2>It starts with you.<br/>Not a product.</h2>
+   <p className="ins-sub">No two families get the same answer here, because no two families are the same. Everything your agent puts together is shaped by your personal circumstances — who depends on you, what you earn, what you own, and what you want to leave behind.</p>
+   <div className="you-grid">
+    <div className="you-chip"><span>Your people</span><p>Who counts on you — kids, a spouse, parents</p></div>
+    <div className="you-chip"><span>Your health</span><p>What you qualify for, exam or no exam</p></div>
+    <div className="you-chip"><span>Your budget</span><p>What fits comfortably, month after month</p></div>
+    <div className="you-chip"><span>Your home</span><p>The mortgage and what it would take to keep it</p></div>
+    <div className="you-chip"><span>Your age &amp; stage</span><p>Working years, new baby, near retirement</p></div>
+    <div className="you-chip"><span>Your goals</span><p>What you want your protection to do</p></div>
+   </div>
+   <p className="you-note">That’s the whole reason the first step is a conversation, not a form: the right answer comes from your life, and your agent builds the plan around it.</p>
+  </section>
   <section className="ins-sec container section-pad">
    <p className="eyebrow">What we protect</p>
    <h2>Five things worth protecting.<br/>One conversation to cover them.</h2>
