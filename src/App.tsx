@@ -82,14 +82,14 @@ function InsurancePage(){
  return <>
   <section className="ins-hero"><div className="container">
    <p className="eyebrow">Atlas Insurance</p>
-   <h1>Protection for those<br/>that matter most.</h1>
+   <h1>Protection for those<br/>that matter most</h1>
    <p className="ins-lead">Atlas Insurance is an independent agency built on one promise: protect the people who count on you — the house, the paychecks, the goodbyes — plainly explained, honestly priced, and handled over a simple phone call with a licensed agent.</p>
    <div className="ins-hero-btns"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={22}/></Link><a className="button button-ghost" href="#ask">Ask a question</a></div>
   </div></section>
   {SHOW_CARRIERS&&<section className="carrier-band"><p className="carrier-label">Appointed with 50+ trusted carriers</p><div className="carrier-track">{[...carriers,...carriers].map(([f,n],i)=><span className="carrier-tile" key={i}><img src={asset(`/carriers/${f}`)} alt={i<carriers.length?n:''} loading="lazy"/></span>)}</div></section>}
   <section className="ins-sec container section-pad">
    <p className="eyebrow">Built around you</p>
-   <h2>It starts with you.<br/>Not a product.</h2>
+   <h2>It starts with you<br/>Not a product</h2>
    <p className="ins-sub">No two families get the same answer here, because no two families are the same. Everything your agent puts together is shaped by your personal circumstances — who depends on you, what you earn, what you own, and what you want to leave behind.</p>
    <div className="you-grid">
     <div className="you-chip"><span>Your people</span><p>Who counts on you — kids, a spouse, parents</p></div>
@@ -103,16 +103,16 @@ function InsurancePage(){
   </section>
   <section className="ins-sec container section-pad">
    <p className="eyebrow">What we protect</p>
-   <h2>Five things worth protecting.<br/>One conversation to cover them.</h2>
+   <h2>Five things worth protecting<br/>One conversation to cover them</h2>
    <p className="ins-sub">Every family’s answer is different. These are the protections — your agent helps you match one (or a mix) to your people, your budget, and your stage of life.</p>
    <div className="pro-grid">
     {protections.map(p=><article className="pro-card" key={p.title}><span className="pro-tag">{p.tag}</span><h3>{p.title}</h3><p className="pro-who">{p.who}</p><p>{p.body}</p></article>)}
-    <article className="pro-card pro-card-cta"><span className="pro-tag">Not sure?</span><h3>That’s the call.</h3><p className="pro-who">15–30 minutes, no pressure</p><p>Tell the agent about your people and your budget. They’ll lay out what fits — in plain words, with real numbers — and you decide. Coverage can start around a dollar a day.</p></article>
+    <article className="pro-card pro-card-cta"><span className="pro-tag">Not sure?</span><h3>That’s the call</h3><p className="pro-who">15–30 minutes, no pressure</p><p>Tell the agent about your people and your budget. They’ll lay out what fits — in plain words, with real numbers — and you decide. Coverage can start around a dollar a day.</p></article>
    </div>
   </section>
   <section className="ins-sec alt"><div className="container section-pad">
    <p className="eyebrow">Why Atlas</p>
-   <h2>Independent, on purpose.</h2>
+   <h2>Independent, on purpose</h2>
    <p className="ins-sub">A captive agent can only sell you one company’s products. An independent agency works the other way around — we start from your situation and shop it across carriers.</p>
    <div className="indep-grid">
     <div className="indep-item"><h3>We work for you, not a carrier</h3><p>Atlas compares options from multiple top-rated insurance carriers and brings you the ones that actually fit — your health, your budget, your timeline.</p></div>
@@ -122,7 +122,7 @@ function InsurancePage(){
   </div></section>
   <section className="ins-sec container section-pad">
    <p className="eyebrow">How it works</p>
-   <h2>Three steps. No paperwork maze.</h2>
+   <h2>Three steps<br/>No paperwork maze</h2>
    <div className="ins-steps">
     <div className="ins-step"><span className="step-number">01</span><h3>Book your Atlas call</h3><p>Pick a time that suits you — as soon as today or tomorrow. A licensed agent calls you. No links, no video.</p></div>
     <div className="ins-step"><span className="step-number">02</span><h3>Talk it through</h3><p>Your family, your budget, your questions. The agent compares options across the carriers and puts real numbers together.</p></div>
@@ -131,8 +131,8 @@ function InsurancePage(){
    <Link className="button ins-book-btn" to="/book">Book your call now<ArrowUpRight size={22}/></Link>
   </section>
   <div id="ask"><ContactSection initialService="Insurance"/></div>
-  <section className="faq-section container section-pad"><div><p className="eyebrow">Good questions</p><h2>Things families actually ask.</h2></div><div className="faq-list">{insFaq.map(q=><details key={q.q}><summary>{q.q}<Plus size={20} strokeWidth={1.5}/></summary><p>{q.a}</p></details>)}<p className="service-note">Coverage availability and terms depend on the insurer, eligibility, and underwriting. A website inquiry or phone call does not bind coverage.</p></div></section>
-  <section className="compact-cta"><div className="container"><h2>The best time is<br/>before you need it.</h2><Link className="button button-white" to="/book">Book your Atlas call<ArrowUpRight size={23}/></Link></div></section>
+  <section className="faq-section container section-pad"><div><p className="eyebrow">Good questions</p><h2>Things families actually ask</h2></div><div className="faq-list">{insFaq.map(q=><details key={q.q}><summary>{q.q}<Plus size={20} strokeWidth={1.5}/></summary><p>{q.a}</p></details>)}<p className="service-note">Coverage availability and terms depend on the insurer, eligibility, and underwriting. A website inquiry or phone call does not bind coverage.</p></div></section>
+  <section className="compact-cta"><div className="container"><h2>The best time is<br/>before you need it</h2><Link className="button button-white" to="/book">Book your Atlas call<ArrowUpRight size={23}/></Link></div></section>
  </>;
 }
 function DivisionPage(){
