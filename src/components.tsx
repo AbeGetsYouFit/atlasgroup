@@ -69,7 +69,7 @@ export function Footer(){return <footer className="site-footer"><div className="
  <div className="footer-links"><p className="label">Atlas</p><Link to="/#approach">Our approach</Link><Link to="/about">About Atlas</Link><Link to="/contact">Contact</Link></div></div>
  {/* A2P 10DLC: carriers check that the registered brand's legal name, address, phone and
      email appear on the website. Removing any of these can fail the registration review. */}
- <address className="footer-contact">Atlas Insurances LLC · <a href="tel:+13135130268">(313) 513-0268</a> · <a href="mailto:info@atlasgroupmi.com">info@atlasgroupmi.com</a></address>
+ <address className="footer-contact">Atlas Insurances LLC · Dearborn Heights, MI · <a href="tel:+13135130268">(313) 513-0268</a> · <a href="mailto:info@atlasgroupmi.com">info@atlasgroupmi.com</a></address>
  <div className="footer-bottom"><span>Metro Detroit. Serving Michigan.</span><div><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link><Link to="/accessibility">Accessibility</Link><span>© {new Date().getFullYear()} Atlas Group</span></div></div>
  <p className="image-disclosure">Atlas Properties, Atlas Insurance, Atlas Mortgage, and Atlas Construction are affiliated companies of Atlas Group, the next chapter of Atlas Properties Plus. You are never required to use more than one. Equal Housing Opportunity. Imagery is illustrative and does not depict available listings or completed Atlas projects.</p>
  </div></footer>}

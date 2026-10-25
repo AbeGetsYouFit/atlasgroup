@@ -57,11 +57,12 @@ test('the footer publishes the brand name, phone and email', () => {
   ]) assert.ok(form.includes(required), `the footer no longer publishes: ${required}`);
 });
 
-test('the chat widget is kept off every page that has the sms consent form', () => {
-  const blocked = indexHtml.match(/var BLOCKED = \[([^\]]*)\]/)?.[1] ?? '';
-  for (const route of ["'/'", "'/about'", "'/contact'"])
-    assert.ok(blocked.includes(route), `ContactSection renders on ${route}, so the widget must be blocked there`);
-  assert.match(indexHtml, /data-widget-id/, 'the chat widget loader is missing entirely');
+test('no third-party chat widget collects phone numbers anywhere', () => {
+  /* The widget was the registered opt-in only until campaign CCON4S6 was approved; since
+     2026-10-25 the native smsConsent checkbox is the sole opt-in. A reintroduced widget
+     would contradict the attestation that no other phone-collecting form exists. */
+  assert.doesNotMatch(indexHtml, /data-widget-id|widgets\.leadconnectorhq\.com/,
+    'a chat widget loader is back in index.html; re-read the A2P attestation before shipping it');
 });
 
 /* Meta verifies the domain by scraping this tag from the static head. If it moves into a

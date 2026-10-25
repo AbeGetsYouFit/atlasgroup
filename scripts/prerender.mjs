@@ -5,7 +5,7 @@ const escape=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<
 try{
  const {render}=await vite.ssrLoadModule('/src/entry-server.tsx');
  const template=await readFile('dist/index.html','utf8');
- const routes=['/','/properties','/insurance','/mortgage','/construction','/about','/contact','/privacy','/terms','/accessibility','/404'];
+ const routes=['/','/properties','/insurance','/mortgage','/construction','/about','/contact','/book','/privacy','/terms','/accessibility','/404'];
  for(const route of routes){
   const {html,title,description}=render(route);
   const dir=route==='/'?'dist':`dist${route}`;await mkdir(dir,{recursive:true});
