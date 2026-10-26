@@ -80,7 +80,7 @@ const insFaq=[
 ];
 function InsurancePage(){
  return <>
-  <section className="ins-hero"><div className="container">
+  <section className="ins-hero"><video className="ins-hero-film" src={asset("/media/atlas-hero.mp4")} autoPlay muted loop playsInline aria-hidden="true"/><div className="ins-hero-veil"/><div className="container">
    <p className="eyebrow">Atlas Insurance</p>
    <h1>Protection for those<br/>that matter most</h1>
    <p className="ins-lead">Atlas Insurance is an independent agency built on one promise: protect the people who count on you — the house, the paychecks, the goodbyes — plainly explained, honestly priced, and handled over a simple phone call with a licensed agent.</p>
