@@ -114,12 +114,11 @@ function InsurancePage(){
    <p className="eyebrow">Why Atlas</p>
    <h2>Independent, on purpose</h2>
    <p className="ins-sub">A captive agent can only sell you one company’s products. An independent agency works the other way around — we start from your situation and shop it across carriers.</p>
+   <div className="why-film"><video src={asset("/media/why-atlas.mp4")} poster={asset("/media/why-atlas.webp")} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><img src={asset("/media/why-atlas.webp")} alt="" loading="lazy"/></div>
    <div className="indep-grid">
-    {[
-    {film:'agent-kitchen',title:'We work for you, not a carrier',body:'Atlas compares options from multiple top-rated insurance carriers and brings you the ones that actually fit — your health, your budget, your timeline.'},
-    {film:'agent-door',title:'Licensed where you live',body:'Atlas Insurance and its producers are licensed in states across the country — your agent confirms availability where you live on the call.'},
-    {film:'agent-desk',title:'Principal-led, not a call center',body:'The person on your call is a licensed producer whose name is on the door. Your situation is handled by the people accountable for it — start to finish.'}
-    ].map(i=><article className="indep-item" key={i.film}><div className="indep-film"><video src={asset(`/media/${i.film}.mp4`)} poster={asset(`/media/${i.film}.webp`)} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><img src={asset(`/media/${i.film}.webp`)} alt="" loading="lazy"/></div><h3>{i.title}</h3><p>{i.body}</p></article>)}
+    <div className="indep-item"><h3>We work for you, not a carrier</h3><p>Atlas compares options from multiple top-rated insurance carriers and brings you the ones that actually fit — your health, your budget, your timeline.</p></div>
+    <div className="indep-item"><h3>Licensed where you live</h3><p>Atlas Insurance and its producers are licensed in states across the country — your agent confirms availability where you live on the call.</p></div>
+    <div className="indep-item"><h3>Principal-led, not a call center</h3><p>The person on your call is a licensed producer whose name is on the door. Your situation is handled by the people accountable for it — start to finish.</p></div>
    </div>
   </div></section>
   <section className="ins-sec container section-pad">
