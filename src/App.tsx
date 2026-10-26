@@ -110,11 +110,10 @@ function InsurancePage(){
     <article className="pro-card pro-card-cta"><span className="pro-tag">Not sure?</span><h3>That’s the call</h3><p className="pro-who">15–30 minutes, no pressure</p><p>Tell the agent about your people and your budget. They’ll lay out what fits — in plain words, with real numbers — and you decide. Coverage can start around a dollar a day.</p></article>
    </div>
   </section>
-  <section className="ins-sec alt"><div className="container section-pad">
+  <section className="ins-sec why-sec"><video className="why-film" src={asset("/media/why-atlas.mp4")} poster={asset("/media/why-atlas.webp")} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><div className="why-veil"/><div className="container section-pad">
    <p className="eyebrow">Why Atlas</p>
    <h2>Independent, on purpose</h2>
    <p className="ins-sub">A captive agent can only sell you one company’s products. An independent agency works the other way around — we start from your situation and shop it across carriers.</p>
-   <div className="why-film"><video src={asset("/media/why-atlas.mp4")} poster={asset("/media/why-atlas.webp")} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><img src={asset("/media/why-atlas.webp")} alt="" loading="lazy"/></div>
    <div className="indep-grid">
     <div className="indep-item"><h3>We work for you, not a carrier</h3><p>Atlas compares options from multiple top-rated insurance carriers and brings you the ones that actually fit — your health, your budget, your timeline.</p></div>
     <div className="indep-item"><h3>Licensed where you live</h3><p>Atlas Insurance and its producers are licensed in states across the country — your agent confirms availability where you live on the call.</p></div>
