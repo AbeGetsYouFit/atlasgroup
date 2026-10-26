@@ -65,11 +65,11 @@ function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Foun
 const SHOW_CARRIERS=true;
 const carriers:[string,string][]=[['mutual-of-omaha.png','Mutual of Omaha'],['aig.png','AIG'],['transamerica.png','Transamerica'],['gerber.png','Gerber Life'],['foresters.png','Foresters Financial'],['americo.png','Americo'],['aetna.svg','Aetna'],['prosperity.png','Prosperity Life'],['royal-neighbors.png','Royal Neighbors of America'],['american-amicable.png','American Amicable']];
 const protections=[
- {tag:'No medical exam options',title:'Final Expense',who:'Ease the goodbye',body:'Smaller, permanent protection sized to funeral and end-of-life costs, so grief never comes with a bill. Simple health questions — many options skip the medical exam entirely.'},
- {tag:'Most affordable',title:'Income Replacement Coverage',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
- {tag:'Keeps the home',title:'Mortgage Protection Assurance',who:'The roof stays over their heads',body:'Protection matched to your mortgage, so if something happens to you, the house gets paid off — and your family keeps their home, not a payment book.'},
- {tag:'Never expires',title:'Whole Life',who:'Leave something behind, guaranteed',body:'Permanent protection with a payout whenever that day comes, payments that never rise, and a value that quietly grows over time — something you can even borrow against in life.'},
- {tag:'Protect & grow',title:'Indexed Universal Life',who:'Cover today, build for tomorrow',body:'Flexible, permanent protection that also builds a cash value tied to a market index — growth potential with downside limits. For people thinking about protection and the long game together.'},
+ {tag:'No medical exam options',title:'Final Expense',who:'Ease the goodbye',body:'Smaller, permanent protection sized to funeral and end-of-life costs, so grief never comes with a bill. Simple health questions — many options skip the medical exam entirely.',what:'A small whole life policy, usually $5,000 to $50,000, built to cover a funeral, final medical bills, and small debts.',facts:['Permanent — it never expires as long as you pay', 'Simple health questions; many options need no medical exam', 'The payment never goes up, and the payout is tax-free to your family']},
+ {tag:'Most affordable',title:'Income Replacement Coverage',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.',what:'Term life insurance: a set, tax-free payout if you pass away during a set number of years, usually 10, 20, or 30.',facts:['The most coverage for the lowest monthly cost', 'Covers the years your family depends on your paycheck', 'Many policies can convert to permanent coverage later']},
+ {tag:'Keeps the home',title:'Mortgage Protection Assurance',who:'The roof stays over their heads',body:'Protection matched to your mortgage, so if something happens to you, the house gets paid off — and your family keeps their home, not a payment book.',what:'Term life insurance sized to your mortgage, so the house can be paid off if something happens to you.',facts:['The payout goes to your family, not the bank — they choose how to use it', 'Term length matched to the years left on the mortgage', 'Options with no medical exam']},
+ {tag:'Never expires',title:'Whole Life',who:'Leave something behind, guaranteed',body:'Permanent protection with a payout whenever that day comes, payments that never rise, and a value that quietly grows over time — something you can even borrow against in life.',what:'Permanent life insurance: a guaranteed payout whenever that day comes, level payments for life, and a cash value that grows every year.',facts:['Never expires, and the premium never rises', 'Builds cash value you can borrow against while living', 'Some carriers pay dividends on top']},
+ {tag:'Protect & grow',title:'Indexed Universal Life',who:'Cover today, build for tomorrow',body:'Flexible, permanent protection that also builds a cash value tied to a market index — growth potential with downside limits. For people thinking about protection and the long game together.',what:'Permanent coverage with flexible payments and a cash value tied to a market index — growth potential with a floor against losses.',facts:['Adjust premiums and coverage as your life changes', 'Cash value grows tax-deferred, with a 0% floor in down years', 'Built for protection and retirement income planned together']},
 ];
 const insFaq=[
  {q:'What does protection like this cost?',a:'It depends on your age, health, the amount, and how long you want it — which is why no honest website quotes you a number. Coverage can start at around a dollar a day; your Benefits Coordinator puts real numbers together on the call, and there’s no fee for the conversation.'},
@@ -79,7 +79,7 @@ const insFaq=[
  {q:'Does booking a call commit me to anything?',a:'No. The call is a conversation with a licensed Atlas Benefits Coordinator, not an application. Nothing is bound, charged, or signed because you booked a time.'},
 ];
 function PlanBody({p}:{p:typeof protections[number]}){
- return <><div className="plans-top"><span className="pro-mark">Atlas plan</span><span className="plans-tag">{p.tag}</span></div><h3>{p.title}</h3><p className="plans-who">{p.who}</p><p className="plans-body">{p.body}</p><div className="plans-cta"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={19} aria-hidden="true"/></Link><span>15–30 minutes, no pressure</span></div></>;
+ return <><div className="plans-top"><span className="pro-mark">Atlas plan</span><span className="plans-tag">{p.tag}</span></div><h3>{p.title}</h3><p className="plans-who">{p.who}</p><p className="plans-what">{p.what}</p><ul className="plans-facts">{p.facts.map(f=><li key={f}>{f}</li>)}</ul><div className="plans-cta"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={19} aria-hidden="true"/></Link><span>15–30 minutes, no pressure</span></div></>;
 }
 function PlansSwitcher(){
  const [sel,setSel]=useState(0);
@@ -107,6 +107,21 @@ function InsurancePage(){
    <div className="ins-hero-btns"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={22}/></Link><a className="button button-ghost" href="#ask">Ask a question</a></div>
   </div></section>
   {SHOW_CARRIERS&&<section className="carrier-band"><p className="carrier-label">Appointed with 50+ trusted carriers</p><div className="carrier-track">{[...carriers,...carriers].map(([f,n],i)=><span className="carrier-tile" key={i}><img src={asset(`/carriers/${f}`)} alt={i<carriers.length?n:''} loading="lazy"/></span>)}</div></section>}
+  <section className="basics-sec"><div className="container section-pad">
+   <div className="basics-head">
+    <div>
+     <p className="eyebrow">The basics</p>
+     <h2>What life insurance is,<br/>exactly</h2>
+    </div>
+    <p className="ins-sub">A contract with an insurance company: you pay a small amount each month, and if you pass away while it’s in force, the company pays your family a set amount of money, tax-free. That’s the whole idea. The rest is detail — and the detail is what the call is for.</p>
+   </div>
+   <div className="basics-grid">
+    <div className="basics-item"><span className="basics-num">01</span><h3>The payout</h3><p>The amount your family receives. Insurers call it the <em>death benefit</em>. You choose it — enough to replace income, pay off a house, or cover a funeral.</p></div>
+    <div className="basics-item"><span className="basics-num">02</span><h3>Who gets it</h3><p>The person or people you name — your <em>beneficiaries</em>. It goes to them directly, usually within weeks, not through probate.</p></div>
+    <div className="basics-item"><span className="basics-num">03</span><h3>What it costs</h3><p>The monthly payment, or <em>premium</em>. It depends on your age, health, the amount, and how long you want it — which is why term coverage can start around a dollar a day.</p></div>
+    <div className="basics-item"><span className="basics-num">04</span><h3>Two kinds</h3><p><em>Term</em> covers you for a set number of years at the lowest cost. <em>Permanent</em> (whole life, universal life) lasts your whole life and builds cash value you can use while living.</p></div>
+   </div>
+  </div></section>
   <section className="you-sec">
    <video className="you-film" src={asset("/media/you-faces.mp4")} poster={asset("/media/you-faces.webp")} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><img className="you-poster" src={asset("/media/you-faces.webp")} alt="" aria-hidden="true"/><div className="you-veil"/>
    <div className="container section-pad you-wrap">
