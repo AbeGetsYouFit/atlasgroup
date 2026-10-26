@@ -87,10 +87,16 @@ function InsurancePage(){
    <div className="ins-hero-btns"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={22}/></Link><a className="button button-ghost" href="#ask">Ask a question</a></div>
   </div></section>
   {SHOW_CARRIERS&&<section className="carrier-band"><p className="carrier-label">Appointed with 50+ trusted carriers</p><div className="carrier-track">{[...carriers,...carriers].map(([f,n],i)=><span className="carrier-tile" key={i}><img src={asset(`/carriers/${f}`)} alt={i<carriers.length?n:''} loading="lazy"/></span>)}</div></section>}
-  <section className="ins-sec container section-pad">
+  <section className="ins-sec container section-pad you-sec">
+   <div className="you-top">
+   <div className="you-copy">
    <p className="eyebrow">Built around you</p>
    <h2>It starts with you<br/>Not a product</h2>
    <p className="ins-sub">No two families get the same answer here, because no two families are the same. Everything your Benefits Coordinator puts together is shaped by your personal circumstances — who depends on you, what you earn, what you own, and what you want to leave behind.</p>
+   <p className="you-note">That’s the whole reason the first step is a conversation, not a form: the right answer comes from your life, and your Benefits Coordinator builds the plan around it.</p>
+   </div>
+   <div className="you-faces"><video className="you-film" src={asset("/media/you-faces.mp4")} poster={asset("/media/you-faces.webp")} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><img className="you-poster" src={asset("/media/you-faces.webp")} alt="" aria-hidden="true"/></div>
+   </div>
    <div className="you-grid">
     <div className="you-chip"><span>Your people</span><p>Who counts on you — kids, a spouse, parents</p></div>
     <div className="you-chip"><span>Your health</span><p>What you qualify for, exam or no exam</p></div>
@@ -99,7 +105,7 @@ function InsurancePage(){
     <div className="you-chip"><span>Your age &amp; stage</span><p>Working years, new baby, near retirement</p></div>
     <div className="you-chip"><span>Your goals</span><p>What you want your protection to do</p></div>
    </div>
-   <p className="you-note">That’s the whole reason the first step is a conversation, not a form: the right answer comes from your life, and your Benefits Coordinator builds the plan around it.</p>
+   
   </section>
   <section className="ins-sec container section-pad">
    <p className="eyebrow">What we protect</p>
