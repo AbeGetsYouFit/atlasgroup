@@ -162,7 +162,7 @@ function InsurancePage(){
   </section>
   <div id="ask"><ContactSection initialService="Insurance"/></div>
   <section className="faq-section container section-pad"><div><p className="eyebrow">Good questions</p><h2>Things families actually ask</h2></div><div className="faq-list">{insFaq.map(q=><details key={q.q}><summary>{q.q}<Plus size={20} strokeWidth={1.5}/></summary><p>{q.a}</p></details>)}<p className="service-note">Coverage availability and terms depend on the insurer, eligibility, and underwriting. A website inquiry or phone call does not bind coverage.</p></div></section>
-  <section className="compact-cta"><div className="container"><h2>The best time is<br/>before you need it</h2><Link className="button button-white" to="/book">Book your Atlas call<ArrowUpRight size={23}/></Link></div></section>
+  
  </>;
 }
 function DivisionPage(){
