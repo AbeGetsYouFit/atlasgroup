@@ -65,10 +65,10 @@ function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Foun
 const SHOW_CARRIERS=true;
 const carriers:[string,string][]=[['mutual-of-omaha.png','Mutual of Omaha'],['aig.png','AIG'],['transamerica.png','Transamerica'],['gerber.png','Gerber Life'],['foresters.png','Foresters Financial'],['americo.png','Americo'],['aetna.svg','Aetna'],['prosperity.png','Prosperity Life'],['royal-neighbors.png','Royal Neighbors of America'],['american-amicable.png','American Amicable']];
 const protections=[
- {tag:'Most affordable',title:'Income Replacement Coverage',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
- {tag:'Never expires',title:'Lifetime Legacy',who:'Leave something behind, guaranteed',body:'Permanent protection with a payout whenever that day comes, payments that never rise, and a value that quietly grows over time — something you can even borrow against in life.'},
  {tag:'No medical exam options',title:'Final Expense',who:'Ease the goodbye',body:'Smaller, permanent protection sized to funeral and end-of-life costs, so grief never comes with a bill. Simple health questions — many options skip the medical exam entirely.'},
+ {tag:'Most affordable',title:'Income Replacement Coverage',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
  {tag:'Keeps the home',title:'Mortgage Protection Assurance',who:'The roof stays over their heads',body:'Protection matched to your mortgage, so if something happens to you, the house gets paid off — and your family keeps their home, not a payment book.'},
+ {tag:'Never expires',title:'Lifetime Legacy',who:'Leave something behind, guaranteed',body:'Permanent protection with a payout whenever that day comes, payments that never rise, and a value that quietly grows over time — something you can even borrow against in life.'},
  {tag:'Protect & grow',title:'Lifetime Legacy + Growth',who:'Cover today, build for tomorrow',body:'Flexible, permanent protection that also builds a cash value tied to a market index — growth potential with downside limits. For people thinking about protection and the long game together.'},
 ];
 const insFaq=[
@@ -78,6 +78,26 @@ const insFaq=[
  {q:'I already have a policy. Should I still call?',a:'Yes — that’s what a free policy review is for. People often find they can get more protection for a similar budget. Your Benefits Coordinator will never advise canceling anything until a better arrangement is actually in place.'},
  {q:'Does booking a call commit me to anything?',a:'No. The call is a conversation with a licensed Atlas Benefits Coordinator, not an application. Nothing is bound, charged, or signed because you booked a time.'},
 ];
+function PlanBody({p}:{p:typeof protections[number]}){
+ return <><div className="plans-top"><span className="pro-mark">Atlas plan</span><span className="plans-tag">{p.tag}</span></div><h3>{p.title}</h3><p className="plans-who">{p.who}</p><p className="plans-body">{p.body}</p><div className="plans-cta"><Link className="button" to="/book">Book your Atlas call<ArrowUpRight size={19} aria-hidden="true"/></Link><span>15–30 minutes, no pressure</span></div></>;
+}
+function PlansSwitcher(){
+ const [sel,setSel]=useState(0);
+ return <section className="plans-sec"><div className="container section-pad">
+  <p className="eyebrow">What we protect</p>
+  <h2>What Atlas Insurance<br/>Has to Offer</h2>
+  <p className="ins-sub">Every family’s answer is different. These are the protections — your Benefits Coordinator helps you match one (or a mix) to your people, your budget, and your stage of life.</p>
+  <div className="plans-switch">
+   <div className="plans-list" role="tablist" aria-label="Atlas plans">
+    {protections.map((x,i)=><div className="plans-item" key={x.title}>
+     <button type="button" role="tab" aria-selected={i===sel} className={'plans-btn'+(i===sel?' is-on':'')} onMouseEnter={()=>setSel(i)} onFocus={()=>setSel(i)} onClick={()=>setSel(i)}><span className="plans-num">{String(i+1).padStart(2,'0')}</span><span className="plans-name">{x.title}</span><ArrowRight size={18} aria-hidden="true"/></button>
+     {i===sel && <div className="plans-inline"><PlanBody p={x}/></div>}
+    </div>)}
+   </div>
+   <div className="plans-panel" role="tabpanel"><PlanBody p={protections[sel]}/></div>
+  </div>
+ </div></section>;
+}
 function InsurancePage(){
  return <>
   <section className="ins-hero"><video className="ins-hero-film" src={asset("/media/atlas-hero.mp4")} autoPlay muted loop playsInline aria-hidden="true"/><div className="ins-hero-veil"/><div className="container">
@@ -107,15 +127,7 @@ function InsurancePage(){
    </div>
    
   </section>
-  <section className="ins-sec container section-pad">
-   <p className="eyebrow">What we protect</p>
-   <h2>What Atlas Insurance<br/>Has to Offer</h2>
-   <p className="ins-sub">Every family’s answer is different. These are the protections — your Benefits Coordinator helps you match one (or a mix) to your people, your budget, and your stage of life.</p>
-   <div className="pro-grid">
-    {protections.map(p=><article className="pro-card" key={p.title}><div className="pro-top"><span className="pro-mark">Atlas plan</span><span className="pro-tag">{p.tag}</span></div><h3>{p.title}</h3><p className="pro-who">{p.who}</p><p>{p.body}</p></article>)}
-    <article className="pro-card pro-card-cta"><span className="pro-tag">Not sure?</span><h3>That’s the call</h3><p className="pro-who">15–30 minutes, no pressure</p><p>Tell your Benefits Coordinator about your people and your budget. They’ll lay out what fits — in plain words, with real numbers — and you decide. Coverage can start around a dollar a day.</p></article>
-   </div>
-  </section>
+  <PlansSwitcher/>
   <section className="ins-sec why-sec"><video className="why-film" src={asset("/media/why-atlas.mp4")} poster={asset("/media/why-atlas.webp")} autoPlay muted loop playsInline preload="metadata" aria-hidden="true"/><div className="why-veil"/><div className="container section-pad">
    <p className="eyebrow">Why Atlas</p>
    <h2>Independent, on purpose</h2>
