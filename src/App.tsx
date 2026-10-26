@@ -65,11 +65,11 @@ function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Foun
 const SHOW_CARRIERS=true;
 const carriers:[string,string][]=[['mutual-of-omaha.png','Mutual of Omaha'],['aig.png','AIG'],['transamerica.png','Transamerica'],['gerber.png','Gerber Life'],['foresters.png','Foresters Financial'],['americo.png','Americo'],['aetna.svg','Aetna'],['prosperity.png','Prosperity Life'],['royal-neighbors.png','Royal Neighbors of America'],['american-amicable.png','American Amicable']];
 const protections=[
- {tag:'Most affordable',title:'Income Replacement',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
+ {tag:'Most affordable',title:'Income Replacement Coverage',who:'Keep the paychecks coming',body:'If your family runs on your income, this keeps it running — groceries, tuition, daily life — for the years they’d need it most. The most protection for the lowest cost during your working years.'},
  {tag:'Never expires',title:'Lifetime Legacy',who:'Leave something behind, guaranteed',body:'Permanent protection with a payout whenever that day comes, payments that never rise, and a value that quietly grows over time — something you can even borrow against in life.'},
  {tag:'No medical exam options',title:'Final Expense',who:'Ease the goodbye',body:'Smaller, permanent protection sized to funeral and end-of-life costs, so grief never comes with a bill. Simple health questions — many options skip the medical exam entirely.'},
- {tag:'Keeps the home',title:'Mortgage Protection',who:'The roof stays over their heads',body:'Protection matched to your mortgage, so if something happens to you, the house gets paid off — and your family keeps their home, not a payment book.'},
- {tag:'Protect & grow',title:'Protection That Builds',who:'Cover today, build for tomorrow',body:'Flexible, permanent protection that also builds a cash value tied to a market index — growth potential with downside limits. For people thinking about protection and the long game together.'},
+ {tag:'Keeps the home',title:'Mortgage Protection Assurance',who:'The roof stays over their heads',body:'Protection matched to your mortgage, so if something happens to you, the house gets paid off — and your family keeps their home, not a payment book.'},
+ {tag:'Protect & grow',title:'Lifetime Legacy + Growth',who:'Cover today, build for tomorrow',body:'Flexible, permanent protection that also builds a cash value tied to a market index — growth potential with downside limits. For people thinking about protection and the long game together.'},
 ];
 const insFaq=[
  {q:'What does protection like this cost?',a:'It depends on your age, health, the amount, and how long you want it — which is why no honest website quotes you a number. Coverage can start at around a dollar a day; your agent puts real numbers together on the call, and there’s no fee for the conversation.'},
@@ -106,7 +106,7 @@ function InsurancePage(){
    <h2>Five things worth protecting<br/>One conversation to cover them</h2>
    <p className="ins-sub">Every family’s answer is different. These are the protections — your agent helps you match one (or a mix) to your people, your budget, and your stage of life.</p>
    <div className="pro-grid">
-    {protections.map(p=><article className="pro-card" key={p.title}><span className="pro-tag">{p.tag}</span><h3>{p.title}</h3><p className="pro-who">{p.who}</p><p>{p.body}</p></article>)}
+    {protections.map(p=><article className="pro-card" key={p.title}><div className="pro-top"><span className="pro-mark">Atlas plan</span><span className="pro-tag">{p.tag}</span></div><h3>{p.title}</h3><p className="pro-who">{p.who}</p><p>{p.body}</p></article>)}
     <article className="pro-card pro-card-cta"><span className="pro-tag">Not sure?</span><h3>That’s the call</h3><p className="pro-who">15–30 minutes, no pressure</p><p>Tell the agent about your people and your budget. They’ll lay out what fits — in plain words, with real numbers — and you decide. Coverage can start around a dollar a day.</p></article>
    </div>
   </section>
