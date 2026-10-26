@@ -109,7 +109,7 @@ function InsurancePage(){
   </section>
   <section className="ins-sec container section-pad">
    <p className="eyebrow">What we protect</p>
-   <h2>Five things worth protecting<br/>One conversation to cover them</h2>
+   <h2>What Atlas Insurance<br/>Has to Offer</h2>
    <p className="ins-sub">Every family’s answer is different. These are the protections — your Benefits Coordinator helps you match one (or a mix) to your people, your budget, and your stage of life.</p>
    <div className="pro-grid">
     {protections.map(p=><article className="pro-card" key={p.title}><div className="pro-top"><span className="pro-mark">Atlas plan</span><span className="pro-tag">{p.tag}</span></div><h3>{p.title}</h3><p className="pro-who">{p.who}</p><p>{p.body}</p></article>)}
