@@ -71,7 +71,7 @@
 .you-chip p{font-size:13.5px;color:var(--muted);line-height:1.55}
 .you-note{font-size:15px;color:var(--ink);line-height:1.65;max-width:62ch;margin-top:28px;font-weight:600}
 .ins-hero{position:relative;overflow:hidden}
-.ins-hero-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
-.ins-hero-veil{position:absolute;inset:0;background:linear-gradient(100deg,rgba(20,38,61,.92) 0%,rgba(20,38,61,.72) 45%,rgba(20,38,61,.38) 100%)}
+.ins-hero-film{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}
+.ins-hero-veil{position:absolute;inset:0;background:linear-gradient(100deg,rgba(20,38,61,.84) 0%,rgba(20,38,61,.48) 48%,rgba(20,38,61,.1) 100%)}
 .ins-hero .container{position:relative}
 @media(prefers-reduced-motion:reduce){.ins-hero-film{display:none}}
