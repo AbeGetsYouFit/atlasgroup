@@ -22,6 +22,7 @@ export function StartPage(){
   const [when,setWhen]=useState('');
   const lead=useLeadCapture({page:'/start',stage:'reachout'});
   const first=(fields.name??'').trim().split(/\s+/)[0]||'';
+  const prettyPhone=(v:string|undefined)=>{const d=String(v??'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');return d.length===10?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:(v??'')};
   useEffect(()=>{if(step!=='form')document.querySelector('.start-card')?.scrollIntoView({block:'start',behavior:'smooth'})},[step]);
   async function wait(){await lead.flushNow({...fields,wantsCallback:true},'reachout');setStep('wait')}
   return <>
@@ -47,14 +48,14 @@ export function StartPage(){
           {step==='form'&&<><p className="book-step">Takes about a minute</p><h2>Tell us a little about you</h2><p className="start-promise">A licensed Atlas Benefits Coordinator will reach out, match the carrier to your situation, and give you your number.</p>
             <LeadForm variant="start" page="/start" onCaptured={(id,f)=>{setContactId(id);setFields(f);if(id)track('Lead');setStep('next')}}/></>}
           {step==='next'&&<><p className="book-step start-sent">Sent</p><h2>Thanks{first?`, ${first}`:''}. A Coordinator will reach out</h2>
-            <p className="start-promise">A licensed Atlas Benefits Coordinator will call you at <strong>{fields.phone}</strong> within one business day, match the carrier to your situation, and give you your number.</p>
+            <p className="start-promise">A licensed Atlas Benefits Coordinator will call you at <strong>{prettyPhone(fields.phone)}</strong> within one business day, match the carrier to your situation, and give you your number.</p>
             <p className="start-prefer">Prefer to pick the exact time? Choose one and that's when we call.</p>
             <TimePicker contactId={contactId} onBooked={(_id,start)=>{setWhen(start);track('Schedule');setStep('booked')}}/>
             <div className="start-or"><span/><em>or</em><span/></div>
             <button type="button" className="start-wait" onClick={wait}>I'll wait for the Coordinator's call</button>
             <p className="form-note">Either way, you're on the list. Save {PHONE} so you know it's us.</p></>}
           {step==='booked'&&<div className="book-done" role="status"><Check size={36} strokeWidth={1.5}/><h2>You're all set</h2><p>A licensed Atlas Benefits Coordinator will call you at {new Date(when).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Detroit'})} Eastern. A confirmation text and email are on their way. Need to change the time? Call or text {PHONE}.</p></div>}
-          {step==='wait'&&<div className="book-done" role="status"><Check size={36} strokeWidth={1.5}/><h2>You're on the list</h2><p>A licensed Atlas Benefits Coordinator will call you at {fields.phone} within one business day. Save {PHONE} so you know it's us.</p></div>}
+          {step==='wait'&&<div className="book-done" role="status"><Check size={36} strokeWidth={1.5}/><h2>You're on the list</h2><p>A licensed Atlas Benefits Coordinator will call you at {prettyPhone(fields.phone)} within one business day. Save {PHONE} so you know it's us.</p></div>}
         </div>
       </div>
     </section>
