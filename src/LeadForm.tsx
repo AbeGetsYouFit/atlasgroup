@@ -17,7 +17,7 @@ function load():LeadFormValues{try{const raw=sessionStorage.getItem(STORAGE_KEY)
 function save(v:LeadFormValues){try{sessionStorage.setItem(STORAGE_KEY,JSON.stringify(v))}catch{/* private mode */}}
 
 export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVariant;page:'/book'|'/start';plan?:string;onCaptured:(contactId:string|null,fields:LeadFormValues)=>void}){
-  const [v,setV]=useState<LeadFormValues>(()=>({veteran:false,policyHolder:false,purpose:'final-expense',...load()}));
+  const [v,setV]=useState<LeadFormValues>(()=>({veteran:false,policyHolder:false,purpose:'final-expense',state:'MI',...load()}));
   const [busy,setBusy]=useState(false);
   const lead=useLeadCapture({page,stage:'partial'});
   useEffect(()=>{save(v)},[v]);

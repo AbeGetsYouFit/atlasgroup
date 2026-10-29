@@ -61,7 +61,7 @@ app.post('/api/inquiries',async(req,res)=>{
 });
 app.use('/api',(_req,res)=>res.status(404).json({error:'Not found.'}));
 if(process.env.NODE_ENV==='production') {
-  const routes=['/','/properties','/insurance','/mortgage','/construction','/about','/contact','/book','/privacy','/terms','/accessibility'];
+  const routes=['/','/properties','/insurance','/mortgage','/construction','/about','/contact','/book','/start','/privacy','/terms','/accessibility'];
   for(const [from,to] of Object.entries({'/real-estate':'/properties','/mortgages':'/mortgage'}))app.get(from,(_req,res)=>res.redirect(301,to));
   for(const route of routes)app.get(route,(_req,res)=>res.sendFile(path.join(root,'dist',route,'index.html')));
   app.use(express.static(path.join(root,'dist'),{maxAge:'1h',redirect:false}));
