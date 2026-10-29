@@ -40,9 +40,7 @@ test('start fields become tags and dob is kept',()=>{
   for(const t of ['purpose-mortgage-protection','state-mi','veteran-yes','policy-no']) assert.ok(tags.includes(t),t);
   assert.equal(value.dateOfBirth,'1962-04-09');
 });
-test('bad purpose, plan, state or dob reject',()=>{
-  assert.ok(validateLead({...base,phone:'3136762298',purpose:'<script>'}).error);
-  assert.ok(validateLead({...base,phone:'3136762298',plan:'nope'}).error);
+test('bad state or dob reject',()=>{
   assert.ok(validateLead({...base,phone:'3136762298',state:'Michigan'}).error);
   assert.ok(validateLead({...base,phone:'3136762298',dateOfBirth:'04/09/1962'}).error);
 });
@@ -130,4 +128,38 @@ test('reachout handler removes partial-lead after upsert',async()=>{
   await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:{stage:'reachout',page:'/start',phone:'3136762298'},ip:'1.1.1.1'},res);
   assert.equal(res.code,201);
   assert.ok(calls.removeTags.some(([id,tags])=>id==='c1'&&tags.includes('partial-lead')));
+});
+
+/* Review C1: plan/purpose/utm come from the ad URL, not our form; a bad value drops that field, never the lead. */
+test('unknown plan from the URL is dropped, lead still captured',()=>{
+  const r=validateLead({...base,phone:'3136762298',plan:'Final-Expense'});
+  assert.equal(r.error,undefined);assert.equal(r.value.plan,'');
+});
+test('unknown purpose is dropped, lead still captured',()=>{
+  const r=validateLead({...base,phone:'3136762298',purpose:'<script>'});
+  assert.equal(r.error,undefined);assert.equal(r.value.purpose,'');
+});
+test('handler logs a warn line on a rejected lead',async()=>{
+  const {ghl}=fakeGhl();const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:{stage:'nope',page:'/insurance',phone:'3136762298'},ip:'1.1.1.1'},res);
+  assert.equal(res.code,400);assert.equal(l.warn.length,1);
+});
+/* Review I5: CF-Connecting-IP is only honoured when the hop is really Cloudflare. */
+test('clientKey ignores cf-connecting-ip when req.ip is not a Cloudflare address',()=>{
+  assert.equal(clientKey({ip:'203.0.113.9',get:h=>h==='cf-connecting-ip'?'1.2.3.4':undefined}),'203.0.113.9');
+  assert.equal(clientKey({ip:'104.16.1.1',get:h=>h==='cf-connecting-ip'?'1.2.3.4':undefined}),'1.2.3.4');
+});
+/* Review M8: a 10-digit string that is not a NANP number is not a phone. */
+test('phone with a leading 1 area code is rejected',()=>assert.equal(validateLead({...base,phone:'1313676229'}).skipped,'no-contact-info'));
+
+test('201 carries a booking token when a secret is configured',async()=>{
+  const {ghl}=fakeGhl();const {log}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log,secret:'s3cret'})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,201);assert.equal(typeof res.body.token,'string');assert.ok(res.body.token.length>20);
+});
+/* Review M1: the contact exists after a successful upsert even if the tag cleanup failed. */
+test('removeTags failure after upsert still returns 201 with the id and logs',async()=>{
+  const {ghl}=fakeGhl({methods:{async removeTags(){throw new GhlError(500,'tags down','/tags')}}});const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,201);assert.equal(res.body.contactId,'c1');assert.equal(l.error.length,1);
 });

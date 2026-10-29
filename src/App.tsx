@@ -184,13 +184,13 @@ function BookPage(){
     calendar through /api/slots + /api/book. The GHL widget is gone; a booking here fires the
     same confirmation + reminder workflow as any other appointment on that calendar. */
  const [query]=useSearchParams();const plan=query.get('plan')||'';
- const [step,setStep]=useState<'form'|'pick'|'done'>('form');const [contactId,setContactId]=useState<string|null>(null);const [when,setWhen]=useState('');
+ const [step,setStep]=useState<'form'|'pick'|'done'>('form');const [contactId,setContactId]=useState<string|null>(null);const [token,setToken]=useState<string|null>(null);const [when,setWhen]=useState('');
  useEffect(()=>{window.scrollTo({top:0})},[step]);
  return <section className="book-page container section-pad"><p className="eyebrow">Book a call</p><h1>Pick a time.<br/>We’ll call you.</h1><p className="legal-lead">Tell us where to call, then choose a time. A licensed Atlas Benefits Coordinator calls you — a regular phone call, nothing to download or join. If nothing in the next few days works, <Link to="/contact?service=Insurance">send us a note</Link> and we’ll reach out.</p>
   <div className="book-frame"><div className="book-frame-head"><img className="book-frame-logo" src="/brand/atlas-insurance-primary.svg" alt="Atlas Insurance"/><p className="book-frame-meta"><strong>Your Atlas Call</strong> · 30 minutes · a regular phone call</p></div>
    <div className="book-body">
-    {step==='form'&&<><p className="book-step">Step 1 of 2 · Tell us where to call</p><LeadForm variant="book" page="/book" plan={plan} onCaptured={id=>{setContactId(id);setStep('pick')}}/></>}
-    {step==='pick'&&<><p className="book-step">Step 2 of 2 · Pick a time</p><TimePicker contactId={contactId} onBooked={(_id,start)=>{setWhen(start);setStep('done')}}/></>}
+    {step==='form'&&<><p className="book-step">Step 1 of 2 · Tell us where to call</p><LeadForm variant="book" page="/book" plan={plan} onCaptured={(id,_f,t)=>{setContactId(id);setToken(t);setStep('pick')}}/></>}
+    {step==='pick'&&<><p className="book-step">Step 2 of 2 · Pick a time</p><TimePicker contactId={contactId} token={token} onBooked={(_id,start)=>{setWhen(start);setStep('done')}}/></>}
     {step==='done'&&<div className="book-done" role="status"><Check size={36} strokeWidth={1.5}/><h2>You’re all set</h2><p>A licensed Atlas Benefits Coordinator will call you at {new Date(when).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Detroit'})} Eastern — a regular phone call, nothing to download or join. A confirmation text and email are on their way. Need to change the time? Call or text (313) 513-0268.</p></div>}
    </div>
   </div>

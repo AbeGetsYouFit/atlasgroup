@@ -62,3 +62,31 @@ test('book 429 when rate limited',async()=>{
   const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>false,log:{warn:()=>{}}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1},ip:'1'},res);
   assert.equal(res.code,429);
 });
+
+/* Review I1: a slot GHL refuses must leave the served list, or the visitor re-picks the same time. */
+test('book drops the slot from cache on GHL 4xx',async()=>{
+  const {ghl}=fakeGhl({createError:new GhlError(422,'slot unavailable','/appointments')});const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,log:{error:()=>{}}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1},ip:'1'},res);
+  assert.equal(res.code,409);
+  const r2=fakeRes();await makeSlotsHandler({cache})({},r2);
+  assert.ok(!r2.body.days[0].slots.includes(S1));
+});
+/* Review M2: only a slot conflict reads as slot-taken; a revoked token must not. */
+test('book maps 401 to booking-failed, not slot-taken',async()=>{
+  const {ghl}=fakeGhl({createError:new GhlError(401,'bad token','/appointments')});const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,log:{error:()=>{}}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1},ip:'1'},res);
+  assert.equal(res.code,502);assert.equal(res.body.error,'booking-failed');
+});
+
+/* Review M7: a contact id alone must not let anyone book on someone else's record. */
+import {signContact} from '../server/booking.mjs';
+test('book rejects a contactId without a valid token',async()=>{
+  const {ghl,calls}=fakeGhl();const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,secret:'s3cret',log:{warn:()=>{}}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1,token:'nope'},ip:'1'},res);
+  assert.equal(res.code,403);assert.equal(calls.create.length,0);
+});
+test('book accepts the token /api/leads issued',async()=>{
+  const {ghl}=fakeGhl();const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,secret:'s3cret'})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1,token:signContact('wseU3X6FRfMhVno1u3Xk','s3cret')},ip:'1'},res);
+  assert.equal(res.code,201);
+});

@@ -6,7 +6,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnvFile } from 'node:process';
 import { validateInquiry,makeLimiter,assertMailConfigured,completeInquiry } from './server/inquiries.mjs';
-import { makeLeadHandler,captureMode } from './server/leads.mjs';
+import { makeLeadHandler,captureMode,clientKey } from './server/leads.mjs';
+import { createHash } from 'node:crypto';
 import { makeGhlClient } from './server/ghl.mjs';
 import { makeSlotCache,makeSlotsHandler,makeBookHandler } from './server/booking.mjs';
 
@@ -32,16 +33,19 @@ const ghl=ghlMode==='ghl'?makeGhlClient({token:process.env.GHL_PIT_TOKEN,locatio
 if(ghlMode==='off') console.error('Atlas lead capture: OFF (set GHL_PIT_TOKEN and GHL_LOCATION_ID)'); else console.log(`Atlas lead capture: ${ghlMode}`);
 const allowLeads=makeLimiter({max:30,windowMs:15*60*1000});
 app.get('/api/config',(_req,res)=>res.json({inquiryMode:mailReady?'email':'preview',captureMode:ghlMode==='ghl'?'ghl':'off',publicEmail:process.env.PUBLIC_EMAIL||'',publicPhone:process.env.PUBLIC_PHONE||''}));
-app.post('/api/leads',makeLeadHandler({ghl,allow:allowLeads,mode:ghlMode}));
+/* booking token secret: derived from the GHL token, so no extra env var and it rotates with it */
+const bookSecret=ghl?createHash('sha256').update('atlas-book:'+process.env.GHL_PIT_TOKEN).digest('hex'):'';
+app.post('/api/leads',makeLeadHandler({ghl,allow:allowLeads,mode:ghlMode,secret:bookSecret}));
 const calendarId=process.env.GHL_CALENDAR_ID||'3ZhO43EjFGe3gF5wvfdd';
 const slotCache=ghl?makeSlotCache({ghl,calendarId}):null;
 const allowBook=makeLimiter({max:10,windowMs:15*60*1000});
 app.get('/api/slots',ghl?makeSlotsHandler({cache:slotCache}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
-app.post('/api/book',ghl?makeBookHandler({ghl,cache:slotCache,calendarId,allow:allowBook}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
+app.post('/api/book',ghl?makeBookHandler({ghl,cache:slotCache,calendarId,allow:allowBook,secret:bookSecret}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
 app.post('/api/inquiries',async(req,res)=>{
   const origin=req.get('origin');
   if(origin && origin!==`${req.protocol}://${req.get('host')}` && origin!==process.env.PUBLIC_ORIGIN) return res.status(403).json({error:'Please submit through the Atlas website.'});
-  if(!allow(req.ip)) return res.status(429).json({error:'Please wait a few minutes before sending another inquiry.'});
+  const inquiryKey=clientKey(req);
+  if(!allow(inquiryKey)){console.warn('inquiries: rate-limited',inquiryKey);return res.status(429).json({error:'Please wait a few minutes before sending another inquiry.'})}
   if(req.body?.website) return res.status(400).json({error:'This inquiry could not be accepted.'});
   const {value,error}=validateInquiry(req.body);
   if(error) return res.status(400).json({error});
@@ -49,8 +53,10 @@ app.post('/api/inquiries',async(req,res)=>{
   try {
     if(transport) {
       await transport.sendMail({from:process.env.MAIL_FROM,to:process.env.INQUIRY_TO,replyTo:value.email,subject:`Atlas website inquiry: ${value.service}`,text:`Name: ${value.name}\nEmail: ${value.email}\nPhone: ${value.phone||'not provided'}\nService: ${value.service}\n\n${value.message}\n\nConsent: Contact about this inquiry only.\nSMS consent: ${value.smsConsent?'yes — may be texted':'no — do not text'}\nReference: ${reference}`});
-      if(ghl) await completeInquiry({ghl,value:{...value,page:req.body?.page}});
-      return res.status(201).json({mode:'email',message:'Your inquiry has been sent. Atlas will follow up using the email you provided.'});
+      res.status(201).json({mode:'email',message:'Your inquiry has been sent. Atlas will follow up using the email you provided.'});
+      /* after the response: the visitor never waits on GHL; completeInquiry never throws */
+      if(ghl) void completeInquiry({ghl,value:{...value,page:req.body?.page}});
+      return;
     }
     await mkdir(path.join(root,'data','inquiries'),{recursive:true,mode:0o700});
     await writeFile(path.join(root,'data','inquiries',reference+'.json'),JSON.stringify({...value,consent:true,createdAt:new Date().toISOString(),delivery:'preview-only'},null,2),{mode:0o600});

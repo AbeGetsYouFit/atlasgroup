@@ -16,7 +16,8 @@ declare global{interface Window{fbq?:(...args:unknown[])=>void}}
 const track=(event:string)=>{try{window.fbq?.('track',event)}catch{/* pixel absent */}};
 
 export function StartPage(){
-  const [step,setStep]=useState<'form'|'next'|'booked'|'wait'>('form');
+  const [step,setStep]=useState<'form'|'next'|'booked'|'wait'|'failed'>('form');
+  const [token,setToken]=useState<string|null>(null);
   const [contactId,setContactId]=useState<string|null>(null);
   const [fields,setFields]=useState<LeadFormValues>({});
   const [when,setWhen]=useState('');
@@ -24,9 +25,9 @@ export function StartPage(){
   const first=(fields.name??'').trim().split(/\s+/)[0]||'';
   const prettyPhone=(v:string|undefined)=>{const d=String(v??'').replace(/\D/g,'').replace(/^1(?=\d{10}$)/,'');return d.length===10?`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`:(v??'')};
   useEffect(()=>{if(step!=='form')document.querySelector('.start-card')?.scrollIntoView({block:'start',behavior:'smooth'})},[step]);
-  async function wait(){await lead.flushNow({...fields,wantsCallback:true},'reachout');setStep('wait')}
+  async function wait(){await lead.flushNow({...fields,wantsCallback:true},'reachout');setStep(contactId?'wait':'failed')}
   return <>
-    <div className="start-bar"><img src="/brand/atlas-insurance-primary.svg" alt="Atlas Insurance" className="start-logo"/><a href="#start-form" className="start-phone">Questions? <strong>{PHONE}</strong></a></div>
+    <div className="start-bar"><img src="/brand/atlas-insurance-primary.svg" alt="Atlas Insurance" className="start-logo"/><a href="tel:+13135130268" className="start-phone">Questions? <strong>{PHONE}</strong></a></div>
     <section className="ins-hero start-hero">
       <video className="ins-hero-film" src={asset('/media/atlas-hero.mp4')} autoPlay muted loop playsInline aria-hidden="true"/><div className="ins-hero-veil"/>
       <div className="container start-grid">
@@ -46,19 +47,20 @@ export function StartPage(){
         </div>
         <div className="start-card" id="start-form">
           {step==='form'&&<><p className="book-step">Takes about a minute</p><h2>Tell us a little about you</h2><p className="start-promise">A licensed Atlas Benefits Coordinator will reach out, match the carrier to your situation, and give you your number.</p>
-            <LeadForm variant="start" page="/start" onCaptured={(id,f)=>{setContactId(id);setFields(f);if(id)track('Lead');setStep('next')}}/></>}
+            <LeadForm variant="start" page="/start" onCaptured={(id,f,t)=>{setContactId(id);setToken(t);setFields(f);if(id){track('Lead');setStep('next')}else{setStep('failed')}}}/></>}
           {step==='next'&&<><p className="book-step start-sent">Sent</p><h2>Thanks{first?`, ${first}`:''}. A Coordinator will reach out</h2>
             <p className="start-promise">A licensed Atlas Benefits Coordinator will call you at <strong>{prettyPhone(fields.phone)}</strong> within one business day, match the carrier to your situation, and give you your number.</p>
             <p className="start-prefer">Prefer to pick the exact time? Choose one and that's when we call.</p>
-            <TimePicker contactId={contactId} onBooked={(_id,start)=>{setWhen(start);track('Schedule');setStep('booked')}}/>
+            <TimePicker contactId={contactId} token={token} onBooked={(_id,start)=>{setWhen(start);track('Schedule');setStep('booked')}}/>
             <div className="start-or"><span/><em>or</em><span/></div>
             <button type="button" className="start-wait" onClick={wait}>I'll wait for the Coordinator's call</button>
             <p className="form-note">Either way, you're on the list. Save {PHONE} so you know it's us.</p></>}
           {step==='booked'&&<div className="book-done" role="status"><Check size={36} strokeWidth={1.5}/><h2>You're all set</h2><p>A licensed Atlas Benefits Coordinator will call you at {new Date(when).toLocaleString('en-US',{weekday:'long',month:'long',day:'numeric',hour:'numeric',minute:'2-digit',timeZone:'America/Detroit'})} Eastern. A confirmation text and email are on their way. Need to change the time? Call or text {PHONE}.</p></div>}
+          {step==='failed'&&<div className="book-done" role="alert"><h2>We couldn't save your details</h2><p>Something went wrong on our side and nothing was sent. Call or text <strong>{PHONE}</strong> and a licensed Atlas Benefits Coordinator will take it from there, or try the form again in a minute.</p><button type="button" className="start-wait" onClick={()=>setStep('form')}>Try again</button></div>}
           {step==='wait'&&<div className="book-done" role="status"><Check size={36} strokeWidth={1.5}/><h2>You're on the list</h2><p>A licensed Atlas Benefits Coordinator will call you at {prettyPhone(fields.phone)} within one business day. Save {PHONE} so you know it's us.</p></div>}
         </div>
       </div>
     </section>
-    <footer className="start-foot"><span>Atlas Insurances LLC · {PHONE} · info@atlasgroupmi.com</span><span><Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link> · <Link to="/accessibility">Accessibility</Link> · © 2026 Atlas Group</span></footer>
+    <footer className="start-foot"><span>Atlas Insurances LLC · Dearborn Heights, MI · {PHONE} · info@atlasgroupmi.com</span><span><Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link> · <Link to="/accessibility">Accessibility</Link> · © 2026 Atlas Group</span></footer>
   </>;
 }

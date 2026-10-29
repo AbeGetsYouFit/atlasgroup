@@ -9,10 +9,10 @@ export class GhlError extends Error {
   constructor(status,body,path){super(`GHL ${path} -> ${status}: ${body.slice(0,300)}`);this.name='GhlError';this.status=status;this.body=body;this.path=path}
 }
 
-export function makeGhlClient({token,locationId,fetch=globalThis.fetch}){
+export function makeGhlClient({token,locationId,fetch=globalThis.fetch,timeoutMs=8000}){
   if(!token||!locationId) throw new Error('makeGhlClient needs token and locationId');
   async function request(method,path,body){
-    const init={method,headers:{Authorization:`Bearer ${token}`,Version:'2021-07-28',Accept:'application/json','User-Agent':USER_AGENT}};
+    const init={method,headers:{Authorization:`Bearer ${token}`,Version:'2021-07-28',Accept:'application/json','User-Agent':USER_AGENT},signal:AbortSignal.timeout(timeoutMs)};
     if(body!==undefined){init.headers['Content-Type']='application/json';init.body=JSON.stringify(body)}
     const res=await fetch(BASE+path,init);
     const text=await res.text();
