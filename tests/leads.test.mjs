@@ -68,12 +68,12 @@ test('slugify lowercases, collapses runs, trims and caps at 40',()=>{
 });
 
 /* ---- /api/leads handler ---- */
-import {makeLeadHandler} from '../server/leads.mjs';
+import {makeLeadHandler,verifyContactToken,signContact} from '../server/leads.mjs';
 import {GhlError} from '../server/ghl.mjs';
 function fakeRes(){const r={code:200,body:null,status(c){r.code=c;return r},json(b){r.body=b;return r}};return r}
 function fakeLog(){const l={warn:[],error:[],info:[]};return {log:{warn:(...a)=>l.warn.push(a),error:(...a)=>l.error.push(a),info:(...a)=>l.info.push(a)},l}}
 function fakeGhl(over={}){const calls={upsert:[],removeTags:[]};return {calls,ghl:{async upsertContact(p){calls.upsert.push(p);return over.upsert?over.upsert():{id:'c1',isNew:true}},async removeTags(id,tags){calls.removeTags.push([id,tags])},...over.methods}}}
-const good={stage:'partial',page:'/insurance',phone:'3136762298',smsConsent:true};
+const good={stage:'partial',page:'/insurance',phone:'3136762298',consent:true,smsConsent:true};
 
 test('503 when mode off',async()=>{
   const {log}=fakeLog();const res=fakeRes();
@@ -169,4 +169,35 @@ test('503 when mode off logs an error per dropped lead',async()=>{
   const {log,l}=fakeLog();const res=fakeRes();
   await makeLeadHandler({ghl:null,allow:()=>true,mode:'off',log})({body:good,ip:'1.1.1.1'},res);
   assert.equal(res.code,503);assert.equal(l.error.length,1);
+});
+
+/* Security review #1: SMS consent only counts with the general consent ticked in the same payload. */
+test('smsConsent without consent is sms-consent-no',()=>{
+  const {value}=validateLead({...base,phone:'3136762298',smsConsent:true,consent:false});
+  assert.ok(leadTags(value).includes('sms-consent-no'));
+});
+/* #2: IPv6 clients are keyed on their /64, not the full address. */
+test('clientKey folds IPv6 to its /64',()=>{
+  assert.equal(clientKey({ip:'2001:db8:abcd:1234:aaaa:bbbb:cccc:dddd',get:()=>undefined}),'2001:db8:abcd:1234::/64');
+  assert.equal(clientKey({ip:'::ffff:203.0.113.9',get:()=>undefined}),'203.0.113.9');
+});
+/* #2: same-site check on the capture endpoint, mirroring /api/inquiries. */
+test('handler rejects a foreign Origin',async()=>{
+  const {ghl,calls}=fakeGhl();const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:good,ip:'1.1.1.1',protocol:'https',get:h=>h==='origin'?'https://evil.example':h==='host'?'atlasgroupmi.com':undefined},res);
+  assert.equal(res.code,403);assert.equal(calls.upsert.length,0);assert.equal(l.warn.length,1);
+});
+/* #3: booking tokens expire. */
+test('signContact tokens expire and verify constant-time',()=>{
+  const t=signContact('c1','s',1000);
+  assert.equal(verifyContactToken('c1',t,'s',1000+60*60*1000-1),true);
+  assert.equal(verifyContactToken('c1',t,'s',1000+60*60*1000+1),false);
+  assert.equal(verifyContactToken('c2',t,'s',2000),false);
+  assert.equal(verifyContactToken('c1','garbage','s',2000),false);
+});
+/* #6: a DOB must be a real date in a sane range. */
+test('impossible dates of birth are dropped, not sent',()=>{
+  assert.equal(validateLead({...base,phone:'3136762298',dateOfBirth:'9999-99-99'}).error,'bad date of birth');
+  assert.equal(validateLead({...base,phone:'3136762298',dateOfBirth:'1800-01-01'}).error,'bad date of birth');
+  assert.equal(validateLead({...base,phone:'3136762298',dateOfBirth:'1962-04-09'}).value.dateOfBirth,'1962-04-09');
 });

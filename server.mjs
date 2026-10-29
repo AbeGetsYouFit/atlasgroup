@@ -61,7 +61,8 @@ app.post('/api/inquiries',async(req,res)=>{
     await mkdir(path.join(root,'data','inquiries'),{recursive:true,mode:0o700});
     await writeFile(path.join(root,'data','inquiries',reference+'.json'),JSON.stringify({...value,consent:true,createdAt:new Date().toISOString(),delivery:'preview-only'},null,2),{mode:0o600});
     res.status(201).json({mode:'preview',message:'Your inquiry was saved in this local preview. It has not been sent to Atlas.'});
-  } catch {
+  } catch (err) {
+    console.error('inquiries: delivery failed',String(err?.message??err).slice(0,300));
     res.status(503).json({error:'We could not send your inquiry. Please try again later.'});
   }
 });
