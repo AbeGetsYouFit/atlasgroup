@@ -56,7 +56,7 @@ export function makeLimiter({max=5,windowMs=15*60*1000}={}) {
 
 /* After an inquiry email was accepted, mirror it into GHL and clear the partial state.
    Never throws: the visitor already got their success response from the mail path. */
-const pageSlugs={'/':'home-form','/insurance':'insurance-form','/contact':'contact-form'};
+const pageSlugs={'/':'home-form','/insurance':'insurance-form','/contact':'contact-form','/about':'about-form'};
 export async function completeInquiry({ghl,value,log=console}) {
   try {
     const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');

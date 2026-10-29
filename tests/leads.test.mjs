@@ -26,7 +26,7 @@ test('sms consent without phone is sms-consent-no',()=>{
   assert.ok(leadTags(value).includes('sms-consent-no'));
 });
 test('page tags for home, contact, book and start',()=>{
-  for(const [page,tag] of [['/','src-home-form'],['/contact','src-contact-form'],['/book','src-book'],['/start','src-start']]){
+  for(const [page,tag] of [['/','src-home-form'],['/contact','src-contact-form'],['/about','src-about-form'],['/book','src-book'],['/start','src-start']]){
     const {value}=validateLead({stage:'partial',page,phone:'3136762298'});
     assert.ok(leadTags(value).includes(tag),tag);
   }

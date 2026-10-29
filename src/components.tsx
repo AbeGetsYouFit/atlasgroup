@@ -1,4 +1,5 @@
 import { useEffect,useRef,useState,type FormEvent } from 'react';
+import {useLeadCapture,formFields} from './leadCapture';
 import { Link,useLocation } from 'react-router-dom';
 import { ArrowUpRight,ArrowRight,ChevronDown,Menu,X,Check,LoaderCircle } from 'lucide-react';
 import {divisions,founder,type Division,asset} from './content';
@@ -75,17 +76,19 @@ export function Footer(){return <footer className="site-footer"><div className="
  </div></footer>}
 
 type Config={inquiryMode:'preview'|'email';publicEmail:string;publicPhone:string};
-export function ContactSection({initialService='Not sure yet',standalone=false}:{initialService?:string;standalone?:boolean}){
+export function ContactSection({initialService='Not sure yet',standalone=false,page='/contact'}:{initialService?:string;standalone?:boolean;page?:'/'|'/insurance'|'/contact'|'/about'}){
  const [config,setConfig]=useState<Config|null>(null),[status,setStatus]=useState<'idle'|'sending'|'success'|'error'>('idle'),[feedback,setFeedback]=useState('');
  const [selected,setSelected]=useState('Not sure yet');
  const formRef=useRef<HTMLFormElement>(null);const statusRef=useRef<HTMLDivElement>(null);
+ const lead=useLeadCapture({page,stage:'partial'});
+ const captureForm=(e:{currentTarget:EventTarget|null})=>{const f=(e.currentTarget as HTMLElement|null)?.closest('form');if(f)lead.capture(formFields(f as HTMLFormElement))};
  const staticPreview=import.meta.env.VITE_STATIC_PREVIEW==='1';
  useEffect(()=>{if(staticPreview)return;fetch('/api/config').then(r=>r.ok?r.json():Promise.reject()).then(setConfig).catch(()=>setFeedback('The inquiry form is temporarily unavailable. Please try again later.'))},[staticPreview]);
  useEffect(()=>{setSelected(initialService)},[initialService]);
  async function submit(e:FormEvent<HTMLFormElement>){
-  e.preventDefault();const fd=new FormData(e.currentTarget);setStatus('sending');setFeedback('');
+  e.preventDefault();lead.cancel();const fd=new FormData(e.currentTarget);setStatus('sending');setFeedback('');
   try{
-   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website')})});
+   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website'),page})});
    const result=await response.json();if(!response.ok)throw new Error(result.error||'Something went wrong. Please try again.');
    setStatus('success');setFeedback(result.message);
    requestAnimationFrame(()=>statusRef.current?.focus());
@@ -96,15 +99,15 @@ export function ContactSection({initialService='Not sure yet',standalone=false}:
    {(config?.publicEmail||config?.publicPhone)&&<div className="contact-details">{config.publicEmail&&<a href={`mailto:${config.publicEmail}`}>{config.publicEmail}</a>}{config.publicPhone&&<a href={`tel:${config.publicPhone.replace(/[^+\d]/g,'')}`}>{config.publicPhone}</a>}</div>}
   </div>
   <div className="form-wrap">{status==='success'?<div className="form-success" ref={statusRef} tabIndex={-1} role="status"><Check size={36} strokeWidth={1.5}/><h3>{config?.inquiryMode==='preview'?'Your preview inquiry is saved.':'Your next chapter starts here.'}</h3><p>{feedback}</p><button className="button button-white" onClick={()=>{setStatus('idle');setFeedback('')}}>Start another inquiry<ArrowRight size={20}/></button></div>:<form ref={formRef} onSubmit={submit}>
-   <div className="form-pair"><label>Name<input name="name" autoComplete="name" required maxLength={100} placeholder="Your name"/></label><label>Email<input name="email" autoComplete="email" type="email" required maxLength={254} placeholder="you@example.com"/></label></div>
-   <label>Phone <span className="optional">(optional)</span><input name="phone" autoComplete="tel" type="tel" maxLength={20} placeholder="(313) 555-0100"/></label>
-   <label>What can we help with?<span className="select-wrap"><select name="service" value={selected} onChange={e=>setSelected(e.target.value)} required>{divisions.map(d=><option key={d.service} value={d.service}>{d.service} — {d.brand}</option>)}<option>Not sure yet</option></select><ChevronDown size={18}/></span></label>
+   <div className="form-pair"><label>Name<input name="name" autoComplete="name" required maxLength={100} placeholder="Your name" onChange={captureForm}/></label><label>Email<input name="email" autoComplete="email" type="email" required maxLength={254} placeholder="you@example.com" onBlur={captureForm} onChange={captureForm}/></label></div>
+   <label>What can we help with?<span className="select-wrap"><select name="service" value={selected} onChange={e=>{setSelected(e.target.value);captureForm(e)}} required>{divisions.map(d=><option key={d.service} value={d.service}>{d.service} — {d.brand}</option>)}<option>Not sure yet</option></select><ChevronDown size={18}/></span></label>
    <label>Your message<textarea name="message" rows={3} required maxLength={3000} placeholder="A little about your plans and timeline…"/></label>
    <div className="honey" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
-   <label className="consent"><input type="checkbox" name="consent" required/><span>I agree to be contacted about this inquiry and have read the <Link to="/privacy">privacy notice</Link>.</span></label>
+   <label className="consent"><input type="checkbox" name="consent" required onChange={captureForm}/><span>I agree to be contacted about this inquiry and have read the <Link to="/privacy">privacy notice</Link>.</span></label>
    {/* A2P 10DLC: this checkbox must never be `required`. Carriers reject the
        business registration if SMS opt-in is needed to submit the form. */}
-   <label className="consent"><input type="checkbox" name="smsConsent"/><span>I agree to be contacted by Atlas Insurances LLC by call and text message about life insurance services. Consent is optional and is not a condition of purchase. Msg &amp; data rates may apply. Message frequency varies. Reply STOP to unsubscribe or HELP for help. See our <Link to="/privacy">Privacy Policy</Link> and <Link to="/terms">Terms</Link>.</span></label>
+   <label className="consent"><input type="checkbox" name="smsConsent" onChange={captureForm}/><span>I agree to be contacted by Atlas Insurances LLC by call and text message about life insurance services. Consent is optional and is not a condition of purchase. Msg &amp; data rates may apply. Message frequency varies. Reply STOP to unsubscribe or HELP for help. See our <Link to="/privacy">Privacy Policy</Link> and <Link to="/terms">Terms</Link>.</span></label>
+   <label>Phone <span className="optional">(optional)</span><input name="phone" autoComplete="tel" type="tel" maxLength={20} placeholder="(313) 555-0100" onBlur={captureForm} onChange={captureForm}/><span className="field-help">Optional. Tick the box above if texting is OK.</span></label>
    <button className="button button-white submit-button" type="submit" disabled={!config||status==='sending'}>{status==='sending'?<>Saving your inquiry<LoaderCircle className="spinner" size={20}/></>:<>Start a conversation<ArrowUpRight size={23}/></>}</button>
    <p className="form-note">Please don’t include account numbers, medical details, or other sensitive information.</p>
    {config?.inquiryMode==='preview'&&<p className="preview-note">Website preview: inquiries are saved locally and are not sent to Atlas yet.</p>}

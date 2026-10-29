@@ -2,7 +2,7 @@ import {normalisePhone,emailRe,services} from './inquiries.mjs';
 import {slugify} from '../shared/slug.mjs';
 
 export const stages=['partial','book','reachout'];
-export const pages={'/':'home-form','/insurance':'insurance-form','/contact':'contact-form','/book':'book','/start':'start'};
+export const pages={'/':'home-form','/insurance':'insurance-form','/contact':'contact-form','/about':'about-form','/book':'book','/start':'start'};
 export const planSlugs=['final-expense','income-replacement','mortgage-protection','whole-life','iul'];
 export const purposeSlugs=['final-expense','income-replacement','mortgage-protection','other'];
 

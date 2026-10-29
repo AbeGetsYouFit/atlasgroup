@@ -58,7 +58,7 @@ function ServiceExplorer(){
  </div></section>;
 }
 function Approach(){return <section className="approach-section" id="approach" aria-labelledby="approach-title"><div className="approach-image"><img src={asset("/media/neighborhood.webp")} width="800" height="1100" alt="Illustrative leafy Michigan street with brick homes and welcoming porches" loading="lazy"/></div><div className="approach-content reveal"><p className="eyebrow">Our approach</p><h2 id="approach-title">Forward thinking.<br/>Michigan grounded.</h2><p className="approach-intro">Atlas brings property, protection, financing, and building into one conversation, with a Michigan license behind each one. Local experience. A clearer way forward.</p><ol className="steps">{steps.map((step,i)=><li key={step.title}><span className="step-number">0{i+1}</span><div><h3>{step.title}</h3><p>{step.body}</p></div></li>)}</ol><TextLink to="/about">Meet Atlas</TextLink></div></section>}
-function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Founder compact/><ContactSection/></>}
+function Home(){return <><Hero/><ServiceRail/><ServiceExplorer/><Approach/><Founder compact/><ContactSection page="/"/></>}
 
 /* Carrier strip stays off until the lineup is verified against Adam's appointment list
    and each carrier's logo-use rules; switched on 2026-10-25 at the owner’s direction; adjust the lineup when that list is confirmed. */
@@ -160,7 +160,7 @@ function InsurancePage(){
    </div>
    <Link className="button ins-book-btn" to="/book">Book your call now<ArrowUpRight size={22}/></Link>
   </section>
-  <div id="ask"><ContactSection initialService="Insurance"/></div>
+  <div id="ask"><ContactSection initialService="Insurance" page="/insurance"/></div>
   <section className="faq-section container section-pad"><div><p className="eyebrow">Good questions</p><h2>Things families actually ask</h2></div><div className="faq-list">{insFaq.map(q=><details key={q.q}><summary>{q.q}<Plus size={20} strokeWidth={1.5}/></summary><p>{q.a}</p></details>)}<p className="service-note">Coverage availability and terms depend on the insurer, eligibility, and underwriting. A website inquiry or phone call does not bind coverage.</p></div></section>
   
  </>;
@@ -174,8 +174,8 @@ function DivisionPage(){
  </>;
 }
 function About(){return <><section className="about-intro container section-pad"><p className="eyebrow">About Atlas</p><h1>A family business.<br/>A forward-looking approach.</h1><div className="about-intro-bottom"><span>Metro Detroit roots.<br/>Michigan possibilities.</span><p>Atlas started with a simple idea: the important decisions in your life deserve someone who sees how they connect. We’re bringing that idea into a new chapter.</p></div></section><div className="about-panorama"><img src={asset("/media/about-panorama.webp")} alt="Illustrative renovated brick and oak Michigan home under golden autumn maples" width="1400" height="550"/></div>
- <section className="container about-story section-pad"><div><p className="eyebrow">A connected perspective</p><h2>Experience to build on.<br/>Room to think ahead.</h2></div><div><p>Our roots are in Michigan real estate. Our perspective reaches across insurance, mortgages, construction, and development—because a property decision rarely stands on its own.</p><p>Atlas Group is the next chapter of Atlas Properties Plus: a family business pairing {founder.name}’s hands-on experience with a clearer, more connected way to work. Four companies now carry the Atlas name, each with its own Michigan license and each free to stand on its own.</p><p>Come to us for one company or a broader conversation. We start by listening, keep your goals in view, and make space for you to choose the path that fits.</p><TextLink to="/contact">Tell us what’s next</TextLink></div></section><Founder/><Companies/><ContactSection/></>}
-function ContactPage(){const [query]=useSearchParams();const chosen=query.get('service');return <ContactSection standalone initialService={divisions.some(d=>d.service===chosen)?chosen!:'Not sure yet'}/>}
+ <section className="container about-story section-pad"><div><p className="eyebrow">A connected perspective</p><h2>Experience to build on.<br/>Room to think ahead.</h2></div><div><p>Our roots are in Michigan real estate. Our perspective reaches across insurance, mortgages, construction, and development—because a property decision rarely stands on its own.</p><p>Atlas Group is the next chapter of Atlas Properties Plus: a family business pairing {founder.name}’s hands-on experience with a clearer, more connected way to work. Four companies now carry the Atlas name, each with its own Michigan license and each free to stand on its own.</p><p>Come to us for one company or a broader conversation. We start by listening, keep your goals in view, and make space for you to choose the path that fits.</p><TextLink to="/contact">Tell us what’s next</TextLink></div></section><Founder/><Companies/><ContactSection page="/about"/></>}
+function ContactPage(){const [query]=useSearchParams();const chosen=query.get('service');return <ContactSection standalone page="/contact" initialService={divisions.some(d=>d.service===chosen)?chosen!:'Not sure yet'}/>}
 function BookPage(){
  /* The embedded calendar is GHL's "Your Atlas Call" calendar (3ZhO43EjFGe3gF5wvfdd) — the
     same one the phone receptionist books, so website bookings get the same confirmation
