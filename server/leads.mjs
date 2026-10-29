@@ -40,7 +40,7 @@ export function validateLead(input){
 }
 
 export function leadTags(v){
-  const tags=['partial-lead','src-'+pages[v.page]];
+  const tags=[v.stage==='reachout'?'lead':'partial-lead','src-'+pages[v.page]];
   if(v.service) tags.push('service-'+slugify(v.service));
   if(v.plan) tags.push('plan-'+v.plan);
   if(v.purpose) tags.push('purpose-'+v.purpose);
@@ -77,7 +77,8 @@ export function makeLeadHandler({ghl,allow,mode,log=console}){
     if(mode==='preview'){log.info('leads: preview capture',{...value,tags});return res.status(202).json({preview:true})}
     try{
       const {id}=await ghl.upsertContact({firstName:value.firstName,lastName:value.lastName,email:value.email,phone:value.phone,tags,dateOfBirth:value.dateOfBirth});
-      await ghl.removeTags(id,[oppositeConsentTag(tags)]);
+      const drop=[oppositeConsentTag(tags)]; if(value.stage==='reachout') drop.push('partial-lead');
+      await ghl.removeTags(id,drop);
       return res.status(201).json({ok:true,contactId:id});
     }catch(err){
       log.error('leads: GHL upsert failed',err.status??'',err.body??err.message);

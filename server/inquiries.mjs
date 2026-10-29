@@ -60,7 +60,7 @@ const pageSlugs={'/':'home-form','/insurance':'insurance-form','/contact':'conta
 export async function completeInquiry({ghl,value,log=console}) {
   try {
     const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-    const tags=['inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
+    const tags=['lead','inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
     const [firstName='',...rest]=String(value.name).trim().split(/\s+/);
     const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags});
     await ghl.removeTags(id,['partial-lead']);
