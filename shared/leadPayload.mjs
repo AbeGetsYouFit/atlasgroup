@@ -3,7 +3,7 @@
    the browser never sends a request that the server would only skip. */
 const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const digits=v=>String(v??'').replace(/\D/g,'');
-const tenDigits=v=>{const d=digits(v);return d.length===11&&d.startsWith('1')?d.slice(1):d.length===10?d:''};
+const tenDigits=v=>{const d=digits(v);const t=d.length===11&&d.startsWith('1')?d.slice(1):d;return /^[2-9]\d{2}[2-9]\d{6}$/.test(t)?t:''};
 const text=v=>typeof v==='string'?v.trim():'';
 const tri=v=>v===true?true:v===false?false:undefined;
 

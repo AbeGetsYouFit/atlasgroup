@@ -29,14 +29,16 @@ export function makeSlotsHandler({cache,log=console}){
   };
 }
 
-import {clientKey} from './leads.mjs';
-export function makeBookHandler({ghl,cache,calendarId,allow,log=console}){
+import {clientKey,signContact} from './leads.mjs';
+export {signContact};
+export function makeBookHandler({ghl,cache,calendarId,allow,log=console,secret=''}){
   return async function handleBook(req,res){
     const key=clientKey(req);
     if(!allow(key)){log.warn('book: rate-limited',key);return res.status(429).json({error:'slow down'})}
     const contactId=typeof req.body?.contactId==='string'?req.body.contactId:'';
     const startTime=typeof req.body?.startTime==='string'?req.body.startTime:'';
     if(!CONTACT_ID.test(contactId)||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(startTime)) return res.status(400).json({error:'rejected'});
+    if(secret){const token=typeof req.body?.token==='string'?req.body.token:'';if(token!==signContact(contactId,secret)){log.warn('book: bad token for',contactId,key);return res.status(403).json({error:'rejected'})}}
     try{
       await cache.get();
       if(!cache.has(startTime)){ await cache.refresh(); if(!cache.has(startTime)) return res.status(409).json({error:'slot-taken'}); }
@@ -45,7 +47,7 @@ export function makeBookHandler({ghl,cache,calendarId,allow,log=console}){
       return res.status(201).json({ok:true,appointmentId:id});
     }catch(err){
       log.error('book: GHL appointment failed',err.status??'',err.body??err.message);
-      if(err.status>=400&&err.status<500) return res.status(409).json({error:'slot-taken'});
+      if(err.status===409||err.status===422){cache.drop(startTime);return res.status(409).json({error:'slot-taken'})}
       return res.status(502).json({error:'booking-failed'});
     }
   };

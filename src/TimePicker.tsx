@@ -10,7 +10,7 @@ const tz='America/Detroit';
 const dayLabel=(d:string)=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 const timeLabel=(iso:string)=>new Date(iso).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:tz});
 
-export function TimePicker({contactId,onBooked}:{contactId:string|null;onBooked:(appointmentId:string,startTime:string)=>void}){
+export function TimePicker({contactId,token,onBooked}:{contactId:string|null;token?:string|null;onBooked:(appointmentId:string,startTime:string)=>void}){
   const [days,setDays]=useState<Day[]|null>(null);
   const [state,setState]=useState<'loading'|'ready'|'unavailable'>('loading');
   const [day,setDay]=useState(0);
@@ -26,7 +26,7 @@ export function TimePicker({contactId,onBooked}:{contactId:string|null;onBooked:
   async function book(){
     if(!contactId||!pick||busy)return;setBusy(true);setNote('');
     try{
-      const r=await fetch('/api/book',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contactId,startTime:pick})});
+      const r=await fetch('/api/book',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contactId,startTime:pick,token:token??''})});
       const data=await r.json().catch(()=>({}));
       if(r.status===201&&data.ok){onBooked(data.appointmentId,pick);return}
       if(r.status===409){setNote('That time just went. Pick another.');setPick('');await load();return}
@@ -43,7 +43,7 @@ export function TimePicker({contactId,onBooked}:{contactId:string|null;onBooked:
     <p className="time-meta">Times shown in Eastern. 30 minutes, by phone.</p>
     {note&&<p className="form-error" role="alert">{note}</p>}
     {contactId
-      ?<button type="button" className="button lead-submit" disabled={!pick||busy} onClick={book}>{busy?<>Booking<LoaderCircle className="spinner" size={20}/></>:pick?`Book my call for ${timeLabel(pick)}`:'Pick a time'}</button>
+      ?<><button type="button" className="button lead-submit" disabled={!pick||busy} onClick={book}>{busy?<>Booking<LoaderCircle className="spinner" size={20}/></>:pick?`Book my call for ${timeLabel(pick)}`:'Pick a time'}</button><p className="time-meta">Booking sends a confirmation and reminders for this call by text and email.</p></>
       :<p className="form-error" role="alert">We couldn't save your details. Call or text <strong>{PHONE}</strong> and we'll book it for you.</p>}
   </div>;
 }

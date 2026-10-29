@@ -63,3 +63,11 @@ test('non-2xx throws GhlError with status and body',async()=>{
   const ghl=makeGhlClient({token:'tok',locationId:'loc1',fetch});
   await assert.rejects(()=>ghl.addTags('c1',['x']),e=>e instanceof GhlError&&e.status===502&&e.body.includes('bad'));
 });
+
+/* Review I2: a stalled GHL must not hold a visitor; every request carries an abort signal. */
+test('every request carries a timeout signal',async()=>{
+  const {fetch,calls}=fakeFetch(200,{contact:{id:'c1'},new:true});
+  const ghl=makeGhlClient({token:'tok',locationId:'loc1',fetch});
+  await ghl.upsertContact({email:'a@example.com'});
+  assert.ok(calls[0].init.signal instanceof AbortSignal);
+});

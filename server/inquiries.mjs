@@ -29,9 +29,10 @@ export function normalisePhone(raw) {
   if (typeof raw !== 'string' || raw.length > 20) return {error:'Please enter a valid phone number.'};
   if (raw.trim() === '') return {phone:''};
   const digits = raw.replace(/\D/g,'');
-  if (digits.length === 11 && digits.startsWith('1')) return {phone:digits.slice(1)};
-  if (digits.length !== 10) return {error:'Please enter a valid 10-digit US phone number.'};
-  return {phone:digits};
+  const ten = digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits;
+  /* NANP: area code and exchange never start with 0 or 1. */
+  if (!/^[2-9]\d{2}[2-9]\d{6}$/.test(ten)) return {error:'Please enter a valid 10-digit US phone number.'};
+  return {phone:ten};
 }
 
 /* Production must not silently fall back to filing inquiries on disk: a real lead
@@ -44,10 +45,11 @@ export function assertMailConfigured(env) {
   return missing.length === 0;
 }
 
-export function makeLimiter({max=5,windowMs=15*60*1000}={}) {
+export function makeLimiter({max=5,windowMs=15*60*1000,maxKeys=5000}={}) {
   const attempts = new Map();
   return function allow(key,now=Date.now()) {
     for (const [k,v] of attempts) if(now-v.start>windowMs) attempts.delete(k);
+    while (attempts.size >= maxKeys) attempts.delete(attempts.keys().next().value); /* evict oldest */
     const record=attempts.get(key) || {start:now,count:0};
     record.count++; attempts.set(key,record);
     return record.count<=max;

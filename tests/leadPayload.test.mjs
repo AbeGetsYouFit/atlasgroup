@@ -28,3 +28,4 @@ test('readUtm parses and ignores unknown keys',()=>{
   assert.deepEqual(readUtm('?utm_source=meta&utm_campaign=fe-oct&utm_content=v17&plan=whole-life&foo=bar'),{source:'meta',campaign:'fe-oct',content:'v17',plan:'whole-life'});
   assert.deepEqual(readUtm(''),{source:'',campaign:'',content:'',plan:''});
 });
+test('browser side also rejects a non-NANP ten digit string',()=>assert.equal(buildLeadPayload({phone:'1313676229'},ctx),null));

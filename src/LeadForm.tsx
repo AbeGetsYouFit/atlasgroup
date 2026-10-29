@@ -16,7 +16,7 @@ const PURPOSES:[string,string,string][]=[['final-expense','Final Expense','Buria
 function load():LeadFormValues{try{const raw=sessionStorage.getItem(STORAGE_KEY);return raw?JSON.parse(raw):{}}catch{return {}}}
 function save(v:LeadFormValues){try{sessionStorage.setItem(STORAGE_KEY,JSON.stringify(v))}catch{/* private mode */}}
 
-export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVariant;page:'/book'|'/start';plan?:string;onCaptured:(contactId:string|null,fields:LeadFormValues)=>void}){
+export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVariant;page:'/book'|'/start';plan?:string;onCaptured:(contactId:string|null,fields:LeadFormValues,token:string|null)=>void}){
   const [v,setV]=useState<LeadFormValues>(()=>({veteran:false,policyHolder:false,purpose:'final-expense',state:'MI',...load()}));
   const [busy,setBusy]=useState(false);
   const lead=useLeadCapture({page,stage:'partial'});
@@ -27,8 +27,8 @@ export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVari
   async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();if(busy)return;setBusy(true);
     const f=fields();
-    const {contactId}=await lead.flushNow(f,variant==='book'?'book':'reachout');
-    setBusy(false);onCaptured(contactId??null,v);
+    const {contactId,token}=await lead.flushNow(f,variant==='book'?'book':'reachout');
+    setBusy(false);onCaptured(contactId??null,v,token??null);
   }
   const consent=<label className="consent lead-consent"><input type="checkbox" required checked={v.consent===true} onChange={e=>{setV(p=>({...p,consent:e.target.checked}));}}/><span>I agree to be contacted by Atlas Insurances LLC about my inquiry. See our <Link to="/privacy">Privacy Policy</Link> and <Link to="/terms">Terms</Link>.</span></label>;
   if(variant==='book') return <form className="lead-form" onSubmit={submit} noValidate={false}>
