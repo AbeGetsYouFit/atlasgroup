@@ -60,3 +60,27 @@ export function leadTags(v){
 export function oppositeConsentTag(tags){return tags.includes('sms-consent-yes')?'sms-consent-no':'sms-consent-yes'}
 
 export function captureMode(env){return env.GHL_PIT_TOKEN&&env.GHL_LOCATION_ID?'ghl':'off'}
+
+/* Express handler for POST /api/leads. `mode`: 'ghl' | 'preview' | 'off'. The browser
+   ignores the response for partial captures; /start and /book keep contactId for booking.
+   Nothing is swallowed: every GHL failure is logged with status + body, every 429 is logged. */
+export function makeLeadHandler({ghl,allow,mode,log=console}){
+  return async function handleLead(req,res){
+    if(req.body?.website) return res.status(400).json({error:'rejected'});
+    if(!allow(req.ip)){log.warn('leads: rate-limited',req.ip);return res.status(429).json({error:'slow down'})}
+    if(mode==='off') return res.status(503).json({error:'lead capture not configured'});
+    const checked=validateLead(req.body);
+    if(checked.error) return res.status(400).json({error:checked.error});
+    if(checked.skipped) return res.status(202).json({skipped:checked.skipped});
+    const value=checked.value, tags=leadTags(value);
+    if(mode==='preview'){log.info('leads: preview capture',{...value,tags});return res.status(202).json({preview:true})}
+    try{
+      const {id}=await ghl.upsertContact({firstName:value.firstName,lastName:value.lastName,email:value.email,phone:value.phone,tags,dateOfBirth:value.dateOfBirth});
+      await ghl.removeTags(id,[oppositeConsentTag(tags)]);
+      return res.status(201).json({ok:true,contactId:id});
+    }catch(err){
+      log.error('leads: GHL upsert failed',err.status??'',err.body??err.message);
+      return res.status(502).json({ok:false});
+    }
+  };
+}

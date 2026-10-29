@@ -68,3 +68,45 @@ test('slugify lowercases, collapses runs, trims and caps at 40',()=>{
   assert.equal(slugify('x'.repeat(50)).length,40);
   assert.equal(slugify('---'),'');
 });
+
+/* ---- /api/leads handler ---- */
+import {makeLeadHandler} from '../server/leads.mjs';
+import {GhlError} from '../server/ghl.mjs';
+function fakeRes(){const r={code:200,body:null,status(c){r.code=c;return r},json(b){r.body=b;return r}};return r}
+function fakeLog(){const l={warn:[],error:[],info:[]};return {log:{warn:(...a)=>l.warn.push(a),error:(...a)=>l.error.push(a),info:(...a)=>l.info.push(a)},l}}
+function fakeGhl(over={}){const calls={upsert:[],removeTags:[]};return {calls,ghl:{async upsertContact(p){calls.upsert.push(p);return over.upsert?over.upsert():{id:'c1',isNew:true}},async removeTags(id,tags){calls.removeTags.push([id,tags])},...over.methods}}}
+const good={stage:'partial',page:'/insurance',phone:'3136762298',smsConsent:true};
+
+test('503 when mode off',async()=>{
+  const {log}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl:null,allow:()=>true,mode:'off',log})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,503);assert.equal(res.body.error,'lead capture not configured');
+});
+test('202 preview never calls ghl',async()=>{
+  const {ghl,calls}=fakeGhl();const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'preview',log})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,202);assert.deepEqual(res.body,{preview:true});assert.equal(calls.upsert.length,0);assert.equal(l.info.length,1);
+});
+test('201 with contactId and removes opposite consent tag',async()=>{
+  const {ghl,calls}=fakeGhl();const {log}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,201);assert.deepEqual(res.body,{ok:true,contactId:'c1'});
+  assert.ok(calls.upsert[0].tags.includes('sms-consent-yes'));
+  assert.deepEqual(calls.removeTags,[['c1',['sms-consent-no']]]);
+});
+test('400 on honeypot and 202 skipped without contact info',async()=>{
+  const {ghl,calls}=fakeGhl();const {log}=fakeLog();
+  const r1=fakeRes();await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:{...good,website:'x'},ip:'1.1.1.1'},r1);assert.equal(r1.code,400);
+  const r2=fakeRes();await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:{stage:'partial',page:'/insurance',name:'A'},ip:'1.1.1.1'},r2);assert.equal(r2.code,202);assert.equal(r2.body.skipped,'no-contact-info');
+  assert.equal(calls.upsert.length,0);
+});
+test('502 and log.error on GhlError',async()=>{
+  const {ghl}=fakeGhl({upsert:()=>{throw new GhlError(500,'boom','/contacts/upsert')}});const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,502);assert.deepEqual(res.body,{ok:false});assert.equal(l.error.length,1);assert.ok(String(l.error[0]).includes('500'));
+});
+test('429 logs warn',async()=>{
+  const {ghl}=fakeGhl();const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>false,mode:'ghl',log})({body:good,ip:'9.9.9.9'},res);
+  assert.equal(res.code,429);assert.deepEqual(l.warn[0],['leads: rate-limited','9.9.9.9']);
+});

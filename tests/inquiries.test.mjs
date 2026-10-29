@@ -57,3 +57,23 @@ test('production refuses to start when any mail var is missing',()=>{
 test('non-production still allows preview mode',()=>{
   assert.equal(assertMailConfigured({NODE_ENV:'development'}),false);
 });
+
+/* ---- GHL completion hook: a finished inquiry clears the partial state ---- */
+import {completeInquiry} from '../server/inquiries.mjs';
+import {GhlError} from '../server/ghl.mjs';
+test('completion never adds partial-lead and removes it',async()=>{
+  const calls={upsert:[],removeTags:[]};
+  const ghl={async upsertContact(p){calls.upsert.push(p);return {id:'c9',isNew:false}},async removeTags(id,tags){calls.removeTags.push([id,tags])}};
+  const {value}=validateInquiry({...valid,phone:'3135550100',smsConsent:true});
+  await completeInquiry({ghl,value:{...value,page:'/insurance'},log:{error:()=>{}}});
+  assert.ok(!calls.upsert[0].tags.includes('partial-lead'));
+  for(const t of ['inquiry-complete','src-insurance-form','service-real-estate','sms-consent-yes']) assert.ok(calls.upsert[0].tags.includes(t),t);
+  assert.deepEqual(calls.removeTags,[['c9',['partial-lead']]]);
+});
+test('completion swallows and logs GhlError',async()=>{
+  const errors=[];
+  const ghl={async upsertContact(){throw new GhlError(502,'down','/contacts/upsert')},async removeTags(){}};
+  const {value}=validateInquiry(valid);
+  await completeInquiry({ghl,value:{...value,page:'/contact'},log:{error:(...a)=>errors.push(a)}});
+  assert.equal(errors.length,1);
+});
