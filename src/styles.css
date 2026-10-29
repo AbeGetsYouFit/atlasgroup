@@ -97,3 +97,6 @@
 .plans-what{font-size:15px;line-height:1.6;color:var(--ink);margin-top:10px;max-width:56ch}.plans-facts{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px;max-width:56ch}.plans-facts li{position:relative;padding-left:18px;font-size:14px;line-height:1.5;color:var(--muted)}.plans-facts li:before{content:'';position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--blue)}
 
 .field-help{display:block;font-size:12.5px;color:var(--muted,#657181);margin-top:6px;font-weight:400}
+
+/* Abe 10-29: no faces film/poster on phones or narrow windows; the copy stands alone */
+@media(max-width:900px){.you-film,.you-poster,.you-veil{display:none!important}.you-wrap{padding-right:0}}
