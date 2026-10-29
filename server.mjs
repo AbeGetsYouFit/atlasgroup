@@ -8,6 +8,7 @@ import { loadEnvFile } from 'node:process';
 import { validateInquiry,makeLimiter,assertMailConfigured,completeInquiry } from './server/inquiries.mjs';
 import { makeLeadHandler,captureMode } from './server/leads.mjs';
 import { makeGhlClient } from './server/ghl.mjs';
+import { makeSlotCache,makeSlotsHandler,makeBookHandler } from './server/booking.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 try{loadEnvFile(path.join(root,'.env'))}catch(error){if(error.code!=='ENOENT')throw error}
@@ -32,6 +33,11 @@ if(ghlMode==='off') console.error('Atlas lead capture: OFF (set GHL_PIT_TOKEN an
 const allowLeads=makeLimiter({max:30,windowMs:15*60*1000});
 app.get('/api/config',(_req,res)=>res.json({inquiryMode:mailReady?'email':'preview',captureMode:ghlMode==='ghl'?'ghl':'off',publicEmail:process.env.PUBLIC_EMAIL||'',publicPhone:process.env.PUBLIC_PHONE||''}));
 app.post('/api/leads',makeLeadHandler({ghl,allow:allowLeads,mode:ghlMode}));
+const calendarId=process.env.GHL_CALENDAR_ID||'3ZhO43EjFGe3gF5wvfdd';
+const slotCache=ghl?makeSlotCache({ghl,calendarId}):null;
+const allowBook=makeLimiter({max:10,windowMs:15*60*1000});
+app.get('/api/slots',ghl?makeSlotsHandler({cache:slotCache}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
+app.post('/api/book',ghl?makeBookHandler({ghl,cache:slotCache,calendarId,allow:allowBook}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
 app.post('/api/inquiries',async(req,res)=>{
   const origin=req.get('origin');
   if(origin && origin!==`${req.protocol}://${req.get('host')}` && origin!==process.env.PUBLIC_ORIGIN) return res.status(403).json({error:'Please submit through the Atlas website.'});
