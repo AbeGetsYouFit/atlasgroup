@@ -163,3 +163,10 @@ test('removeTags failure after upsert still returns 201 with the id and logs',as
   await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:good,ip:'1.1.1.1'},res);
   assert.equal(res.code,201);assert.equal(res.body.contactId,'c1');assert.equal(l.error.length,1);
 });
+
+/* Silent-failure review #5: capture OFF in production must shout per dropped lead. */
+test('503 when mode off logs an error per dropped lead',async()=>{
+  const {log,l}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl:null,allow:()=>true,mode:'off',log})({body:good,ip:'1.1.1.1'},res);
+  assert.equal(res.code,503);assert.equal(l.error.length,1);
+});

@@ -35,7 +35,7 @@ export function TimePicker({contactId,token,onBooked}:{contactId:string|null;tok
     finally{setBusy(false)}
   }
   if(state==='loading') return <div className="time-picker time-picker-state"><LoaderCircle className="spinner" size={22}/><p>Finding open times</p></div>;
-  if(state==='unavailable'||!days) return <div className="time-picker time-picker-state"><p>Times aren't loading right now. Call or text <strong>{PHONE}</strong> and we'll set it up, or wait for your Coordinator's call.</p></div>;
+  if(state==='unavailable'||!days) return <div className="time-picker time-picker-state"><p>Times aren't loading right now. Call or text <strong>{PHONE}</strong> and we'll set it up{contactId?", or wait for your Coordinator's call.":'. Your details were not saved, so please do reach out.'}</p></div>;
   const cur=days[day];
   return <div className="time-picker">
     <div className="time-days" role="tablist">{days.map((d,i)=><button key={d.date} type="button" role="tab" aria-selected={i===day} className={i===day?'is-on':''} onClick={()=>{setDay(i);setPick('')}}>{dayLabel(d.date)}</button>)}</div>

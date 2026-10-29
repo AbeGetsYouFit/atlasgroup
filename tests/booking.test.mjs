@@ -90,3 +90,17 @@ test('book accepts the token /api/leads issued',async()=>{
   const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,secret:'s3cret'})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1,token:signContact('wseU3X6FRfMhVno1u3Xk','s3cret')},ip:'1'},res);
   assert.equal(res.code,201);
 });
+
+/* Silent-failure review #2: a 422 that is not about the slot is a booking failure, and the slot stays. */
+test('422 without slot wording is booking-failed and keeps the slot',async()=>{
+  const {ghl}=fakeGhl({createError:new GhlError(422,'contactId is invalid','/appointments')});const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,log:{error:()=>{}}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1},ip:'1'},res);
+  assert.equal(res.code,502);assert.equal(res.body.error,'booking-failed');
+  const r2=fakeRes();await makeSlotsHandler({cache})({},r2);assert.ok(r2.body.days[0].slots.includes(S1));
+});
+/* #6: a free-slots outage is logged as what it is. */
+test('a free-slots failure during book is logged with its own label',async()=>{
+  const errors=[];const {ghl}=fakeGhl({freeError:new GhlError(500,'x','/free-slots')});const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,log:{error:(...a)=>errors.push(a.join(' '))}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1},ip:'1'},res);
+  assert.equal(res.code,502);assert.ok(errors[0].includes('free-slots'),errors[0]);
+});

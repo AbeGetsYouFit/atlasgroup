@@ -1,3 +1,4 @@
+import {oppositeConsentTag} from '../shared/consent.mjs';
 export const services = ['Real estate','Insurance','Mortgages','Construction','Not sure yet'];
 export const mailVars = ['SMTP_HOST','SMTP_USER','SMTP_PASS','INQUIRY_TO','MAIL_FROM'];
 export const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,7 +66,7 @@ export async function completeInquiry({ghl,value,log=console}) {
     const tags=['lead','inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
     const [firstName='',...rest]=String(value.name).trim().split(/\s+/);
     const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags});
-    await ghl.removeTags(id,['partial-lead']);
+    await ghl.removeTags(id,['partial-lead',oppositeConsentTag(tags)]);
   } catch (err) {
     log.error('inquiries: GHL completion failed',err.status??'',err.body??err.message);
   }

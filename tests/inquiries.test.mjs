@@ -68,7 +68,7 @@ test('completion never adds partial-lead and removes it',async()=>{
   await completeInquiry({ghl,value:{...value,page:'/insurance'},log:{error:()=>{}}});
   assert.ok(!calls.upsert[0].tags.includes('partial-lead'));
   for(const t of ['inquiry-complete','src-insurance-form','service-real-estate','sms-consent-yes']) assert.ok(calls.upsert[0].tags.includes(t),t);
-  assert.deepEqual(calls.removeTags,[['c9',['partial-lead']]]);
+  assert.equal(calls.removeTags[0][0],'c9');assert.ok(calls.removeTags[0][1].includes('partial-lead'));
 });
 test('completion swallows and logs GhlError',async()=>{
   const errors=[];
@@ -76,4 +76,14 @@ test('completion swallows and logs GhlError',async()=>{
   const {value}=validateInquiry(valid);
   await completeInquiry({ghl,value:{...value,page:'/contact'},log:{error:(...a)=>errors.push(a)}});
   assert.equal(errors.length,1);
+});
+
+/* Silent-failure review #3: completion must not leave a withdrawn SMS consent behind. */
+test('completion removes the opposite consent tag',async()=>{
+  const calls={removeTags:[]};
+  const ghl={async upsertContact(){return {id:'c9',isNew:false}},async removeTags(id,tags){calls.removeTags.push([id,tags])}};
+  const {value}=validateInquiry({...valid,phone:'3135550100',smsConsent:false});
+  await completeInquiry({ghl,value:{...value,page:'/insurance'},log:{error:()=>{}}});
+  assert.ok(calls.removeTags[0][1].includes('partial-lead'));
+  assert.ok(calls.removeTags[0][1].includes('sms-consent-yes'));
 });
