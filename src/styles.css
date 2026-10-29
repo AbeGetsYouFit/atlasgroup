@@ -131,3 +131,6 @@
 .start-wait{font:inherit;font-weight:600;font-size:15px;color:var(--ink);background:#fff;border:1px solid #c9cfd8;border-radius:12px;min-height:48px;cursor:pointer}
 .start-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;padding:28px var(--gutter);border-top:1px solid #e6e8ec;font-size:12.5px;color:var(--muted);background:#fff}.start-foot a{text-decoration:underline}
 @media(max-width:900px){.start-grid{grid-template-columns:1fr;gap:26px}.start-hero.ins-hero{padding-block:26px 18px}.start-hero .ins-hero-film,.start-hero .ins-hero-veil,.start-points,.start-seals,.start-carriers{display:none}.start-copy h1{font-size:30px;margin-bottom:10px}.start-copy .ins-lead{font-size:15px;margin:0}.start-card{padding:20px;border-radius:16px}.start-bar{padding:14px 16px}.start-logo{height:26px}.start-phone{font-size:13px}.start-foot{justify-content:center;text-align:center;font-size:11.5px}}
+
+/* /start card: every block spans the card, same left and right edges */
+.start-card .lead-form,.start-card .time-picker,.start-card .book-done{max-width:none;width:100%}.start-card .time-days{width:100%}.start-card .time-grid{width:100%}
