@@ -110,3 +110,11 @@ test('429 logs warn',async()=>{
   await makeLeadHandler({ghl,allow:()=>false,mode:'ghl',log})({body:good,ip:'9.9.9.9'},res);
   assert.equal(res.code,429);assert.deepEqual(l.warn[0],['leads: rate-limited','9.9.9.9']);
 });
+
+/* Cloudflare fronts Render: with one trusted hop req.ip is a Cloudflare edge that changes per
+   request, so the limiter must key on CF-Connecting-IP when it is present. */
+import {clientKey} from '../server/leads.mjs';
+test('clientKey prefers cf-connecting-ip over req.ip',()=>{
+  assert.equal(clientKey({ip:'104.16.1.1',get:h=>h==='cf-connecting-ip'?'68.41.106.56':undefined}),'68.41.106.56');
+  assert.equal(clientKey({ip:'10.0.0.9',get:()=>undefined}),'10.0.0.9');
+});

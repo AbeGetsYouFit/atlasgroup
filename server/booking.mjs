@@ -29,9 +29,11 @@ export function makeSlotsHandler({cache,log=console}){
   };
 }
 
+import {clientKey} from './leads.mjs';
 export function makeBookHandler({ghl,cache,calendarId,allow,log=console}){
   return async function handleBook(req,res){
-    if(!allow(req.ip)){log.warn('book: rate-limited',req.ip);return res.status(429).json({error:'slow down'})}
+    const key=clientKey(req);
+    if(!allow(key)){log.warn('book: rate-limited',key);return res.status(429).json({error:'slow down'})}
     const contactId=typeof req.body?.contactId==='string'?req.body.contactId:'';
     const startTime=typeof req.body?.startTime==='string'?req.body.startTime:'';
     if(!CONTACT_ID.test(contactId)||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(startTime)) return res.status(400).json({error:'rejected'});
