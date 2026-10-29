@@ -29,7 +29,9 @@ export function makeGhlClient({token,locationId,fetch=globalThis.fetch,timeoutMs
       if(tags?.length) payload.tags=tags;
       if(dateOfBirth) payload.dateOfBirth=dateOfBirth;
       const r=await request('POST','/contacts/upsert',payload);
-      return {id:r.contact?.id??r.id,isNew:r.new===true};
+      const id=r.contact?.id??r.id;
+      if(!id) throw new GhlError(200,JSON.stringify(r),'/contacts/upsert (no contact id in body)');
+      return {id,isNew:r.new===true};
     },
     addTags:(contactId,tags)=>request('POST',`/contacts/${contactId}/tags`,{tags}).then(()=>undefined),
     removeTags:(contactId,tags)=>request('DELETE',`/contacts/${contactId}/tags`,{tags}).then(()=>undefined),
@@ -42,7 +44,9 @@ export function makeGhlClient({token,locationId,fetch=globalThis.fetch,timeoutMs
     },
     async createAppointment({calendarId,contactId,startTime,title}){
       const r=await request('POST','/calendars/events/appointments',{calendarId,locationId,contactId,startTime,title,appointmentStatus:'confirmed'});
-      return {id:r.id??r.appointment?.id};
+      const id=r.id??r.appointment?.id;
+      if(!id) throw new GhlError(200,JSON.stringify(r),'/calendars/events/appointments (no appointment id in body)');
+      return {id};
     },
   };
 }

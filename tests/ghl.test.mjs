@@ -71,3 +71,15 @@ test('every request carries a timeout signal',async()=>{
   await ghl.upsertContact({email:'a@example.com'});
   assert.ok(calls[0].init.signal instanceof AbortSignal);
 });
+
+/* Silent-failure review #1: a 2xx with no contact id is a failure, never a success. */
+test('upsertContact throws GhlError when the 2xx body has no id',async()=>{
+  const {fetch}=fakeFetch(200,{succeeded:false});
+  const ghl=makeGhlClient({token:'tok',locationId:'loc1',fetch});
+  await assert.rejects(()=>ghl.upsertContact({email:'a@example.com'}),e=>e instanceof GhlError&&/no contact id/.test(e.message));
+});
+test('createAppointment throws GhlError when the 2xx body has no id',async()=>{
+  const {fetch}=fakeFetch(200,{});
+  const ghl=makeGhlClient({token:'tok',locationId:'loc1',fetch});
+  await assert.rejects(()=>ghl.createAppointment({calendarId:'c',contactId:'x',startTime:'2026-10-30T10:00:00-04:00',title:'t'}),e=>e instanceof GhlError&&/no appointment id/.test(e.message));
+});

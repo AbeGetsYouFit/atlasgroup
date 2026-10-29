@@ -9,7 +9,7 @@ if(!SITE_ORIGIN||!GHL_PIT_TOKEN||!GHL_LOCATION_ID){console.error('smoke: set SIT
 const PHONE='3135550199';
 const H={Authorization:`Bearer ${GHL_PIT_TOKEN}`,Version:'2021-07-28',Accept:'application/json','User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AtlasSite/1.0'};
 let created=null;
-const fail=async(msg)=>{console.error('smoke: FAIL',msg);if(created){await fetch(`https://services.leadconnectorhq.com/contacts/${created}`,{method:'DELETE',headers:H}).catch(()=>{})}process.exit(1)};
+const fail=async(msg)=>{console.error('smoke: FAIL',msg);if(created){await fetch(`https://services.leadconnectorhq.com/contacts/${created}`,{method:'DELETE',headers:H}).then(r=>{if(!r.ok)console.error('smoke: cleanup DELETE ->',r.status,'contact',created,'LEFT IN GHL')},e=>console.error('smoke: cleanup failed',e.message,'contact',created,'LEFT IN GHL'))}process.exit(1)};
 
 const cfg=await fetch(`${SITE_ORIGIN}/api/config`).then(r=>r.json());
 if(cfg.captureMode!=='ghl') await fail(`captureMode is ${cfg.captureMode}, expected ghl`);
@@ -17,11 +17,11 @@ if(cfg.captureMode!=='ghl') await fail(`captureMode is ${cfg.captureMode}, expec
 const post=await fetch(`${SITE_ORIGIN}/api/leads`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({stage:'partial',page:'/insurance',name:'Smoke Test',phone:PHONE,smsConsent:false})});
 const body=await post.json().catch(()=>({}));
 if(post.status!==201||!body.ok||!body.contactId) await fail(`POST /api/leads -> ${post.status} ${JSON.stringify(body)}`);
+created=body.contactId;
 
 /* Read by id: GHL's contact search index lags a few seconds behind an upsert. */
 const got=await fetch(`https://services.leadconnectorhq.com/contacts/${body.contactId}`,{headers:H});
 const contact=got.ok?(await got.json()).contact:null;
-created=body.contactId;
 if(!contact) await fail(`contact ${body.contactId} not readable: ${got.status}`);
 const tags=contact.tags||[];
 for(const t of ['partial-lead','src-insurance-form','sms-consent-no']) if(!tags.includes(t)) await fail(`missing tag ${t}; tags=${tags.join(',')}`);

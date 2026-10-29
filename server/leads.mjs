@@ -60,7 +60,8 @@ export function leadTags(v){
   return tags;
 }
 
-export function oppositeConsentTag(tags){return tags.includes('sms-consent-yes')?'sms-consent-no':'sms-consent-yes'}
+import {oppositeConsentTag} from '../shared/consent.mjs';
+export {oppositeConsentTag};
 
 export function captureMode(env){return env.GHL_PIT_TOKEN&&env.GHL_LOCATION_ID?'ghl':'off'}
 
@@ -74,7 +75,7 @@ export function makeLeadHandler({ghl,allow,mode,log=console,secret=''}){
     if(req.body?.website) return res.status(400).json({error:'rejected'});
     const key=clientKey(req);
     if(!allow(key)){log.warn('leads: rate-limited',key);return res.status(429).json({error:'slow down'})}
-    if(mode==='off') return res.status(503).json({error:'lead capture not configured'});
+    if(mode==='off'){log.error('leads: capture OFF, dropped lead from',req.body?.page??'?');return res.status(503).json({error:'lead capture not configured'})}
     const checked=validateLead(req.body);
     if(checked.error){log.warn('leads: rejected',checked.error,req.body?.page);return res.status(400).json({error:checked.error})}
     if(checked.skipped) return res.status(202).json({skipped:checked.skipped});

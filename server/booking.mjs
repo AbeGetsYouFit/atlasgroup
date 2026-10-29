@@ -39,15 +39,19 @@ export function makeBookHandler({ghl,cache,calendarId,allow,log=console,secret='
     const startTime=typeof req.body?.startTime==='string'?req.body.startTime:'';
     if(!CONTACT_ID.test(contactId)||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(startTime)) return res.status(400).json({error:'rejected'});
     if(secret){const token=typeof req.body?.token==='string'?req.body.token:'';if(token!==signContact(contactId,secret)){log.warn('book: bad token for',contactId,key);return res.status(403).json({error:'rejected'})}}
+    let step='free-slots';
     try{
       await cache.get();
       if(!cache.has(startTime)){ await cache.refresh(); if(!cache.has(startTime)) return res.status(409).json({error:'slot-taken'}); }
+      step='appointment';
       const {id}=await ghl.createAppointment({calendarId,contactId,startTime,title:'{{contact.name}}'});
       cache.drop(startTime);
       return res.status(201).json({ok:true,appointmentId:id});
     }catch(err){
-      log.error('book: GHL appointment failed',err.status??'',err.body??err.message);
-      if(err.status===409||err.status===422){cache.drop(startTime);return res.status(409).json({error:'slot-taken'})}
+      log.error(`book: GHL ${step} failed`,err.status??'',err.body??err.message);
+      /* 422 is GHL's general validation status; only a body that talks about the slot is a conflict */
+      const taken=step==='appointment'&&(err.status===409||(err.status===422&&/slot|availab|busy|booked|taken/i.test(err.body||'')));
+      if(taken){cache.drop(startTime);return res.status(409).json({error:'slot-taken'})}
       return res.status(502).json({error:'booking-failed'});
     }
   };

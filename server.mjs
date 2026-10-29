@@ -39,8 +39,8 @@ app.post('/api/leads',makeLeadHandler({ghl,allow:allowLeads,mode:ghlMode,secret:
 const calendarId=process.env.GHL_CALENDAR_ID||'3ZhO43EjFGe3gF5wvfdd';
 const slotCache=ghl?makeSlotCache({ghl,calendarId}):null;
 const allowBook=makeLimiter({max:10,windowMs:15*60*1000});
-app.get('/api/slots',ghl?makeSlotsHandler({cache:slotCache}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
-app.post('/api/book',ghl?makeBookHandler({ghl,cache:slotCache,calendarId,allow:allowBook,secret:bookSecret}):(_req,res)=>res.status(503).json({error:'booking not configured'}));
+app.get('/api/slots',ghl?makeSlotsHandler({cache:slotCache}):(_req,res)=>{console.error('slots: booking OFF (no GHL env)');res.status(503).json({error:'booking not configured'})});
+app.post('/api/book',ghl?makeBookHandler({ghl,cache:slotCache,calendarId,allow:allowBook,secret:bookSecret}):(_req,res)=>{console.error('book: booking OFF (no GHL env), dropped booking');res.status(503).json({error:'booking not configured'})});
 app.post('/api/inquiries',async(req,res)=>{
   const origin=req.get('origin');
   if(origin && origin!==`${req.protocol}://${req.get('host')}` && origin!==process.env.PUBLIC_ORIGIN) return res.status(403).json({error:'Please submit through the Atlas website.'});
