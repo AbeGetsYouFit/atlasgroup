@@ -118,3 +118,16 @@ test('clientKey prefers cf-connecting-ip over req.ip',()=>{
   assert.equal(clientKey({ip:'104.16.1.1',get:h=>h==='cf-connecting-ip'?'68.41.106.56':undefined}),'68.41.106.56');
   assert.equal(clientKey({ip:'10.0.0.9',get:()=>undefined}),'10.0.0.9');
 });
+
+/* Abe 10-29: three classes. partial-lead = typed, never submitted; lead = asked for a Coordinator
+   (reachout) or finished the question form; booked-call = picked a time. */
+test('reachout stage is a lead, not a partial',()=>{
+  const tags=leadTags(validateLead({stage:'reachout',page:'/start',phone:'3136762298'}).value);
+  assert.ok(tags.includes('lead'));assert.ok(!tags.includes('partial-lead'));
+});
+test('reachout handler removes partial-lead after upsert',async()=>{
+  const {ghl,calls}=fakeGhl();const {log}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:{stage:'reachout',page:'/start',phone:'3136762298'},ip:'1.1.1.1'},res);
+  assert.equal(res.code,201);
+  assert.ok(calls.removeTags.some(([id,tags])=>id==='c1'&&tags.includes('partial-lead')));
+});
