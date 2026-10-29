@@ -1,5 +1,6 @@
 export const services = ['Real estate','Insurance','Mortgages','Construction','Not sure yet'];
 export const mailVars = ['SMTP_HOST','SMTP_USER','SMTP_PASS','INQUIRY_TO','MAIL_FROM'];
+export const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /* A2P 10DLC: SMS consent is always optional. `consent` stays required — it is the
    general "contact me about this inquiry" consent, not permission to text. Carriers
@@ -11,7 +12,7 @@ export function validateInquiry(input) {
     value[key] = input[key].trim();
     if (!value[key] || value[key].length > limit) return {error:'Please check the length of your '+key+'.'};
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email) || /[\r\n]/.test(value.email)) return {error:'Please enter a valid email address.'};
+  if (!emailRe.test(value.email) || /[\r\n]/.test(value.email)) return {error:'Please enter a valid email address.'};
   if (!services.includes(value.service)) return {error:'Please choose a service.'};
   if (input.consent !== true) return {error:'Please agree to be contacted about this inquiry.'};
   const {phone,error} = normalisePhone(input.phone);
@@ -23,7 +24,7 @@ export function validateInquiry(input) {
 
 /* US ten-digit numbers only; Atlas is licensed in Michigan and the A2P campaign
    is US-only, so an international number cannot be texted under it. */
-function normalisePhone(raw) {
+export function normalisePhone(raw) {
   if (raw === undefined || raw === null || raw === '') return {phone:''};
   if (typeof raw !== 'string' || raw.length > 20) return {error:'Please enter a valid phone number.'};
   if (raw.trim() === '') return {phone:''};
@@ -51,4 +52,19 @@ export function makeLimiter({max=5,windowMs=15*60*1000}={}) {
     record.count++; attempts.set(key,record);
     return record.count<=max;
   };
+}
+
+/* After an inquiry email was accepted, mirror it into GHL and clear the partial state.
+   Never throws: the visitor already got their success response from the mail path. */
+const pageSlugs={'/':'home-form','/insurance':'insurance-form','/contact':'contact-form','/about':'about-form'};
+export async function completeInquiry({ghl,value,log=console}) {
+  try {
+    const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    const tags=['inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
+    const [firstName='',...rest]=String(value.name).trim().split(/\s+/);
+    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags});
+    await ghl.removeTags(id,['partial-lead']);
+  } catch (err) {
+    log.error('inquiries: GHL completion failed',err.status??'',err.body??err.message);
+  }
 }

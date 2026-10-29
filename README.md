@@ -63,6 +63,10 @@ Copy `.env.example` to `.env` and supply the approved SMTP account, sender, and 
 
 Once all SMTP settings are present, the server sends inquiries to `INQUIRY_TO` with the visitor’s email as `Reply-To`. It reports success only after the mail transport accepts the message. Preview mode must not be used to collect unattended public leads.
 
+### Lead capture (GoHighLevel)
+
+With `GHL_PIT_TOKEN` and `GHL_LOCATION_ID` set, `POST /api/leads` upserts a visitor into the Atlas Group GHL sub-account the moment a valid phone or email is entered (the forms call it on blur, debounced). A finished inquiry clears the `partial-lead` tag. `/api/config` reports `captureMode: "ghl"` when it is on; in production without the vars it is `"off"` and the boot log says so loudly. Locally without the vars the endpoint answers `{preview:true}` and logs the payload instead of creating contacts.
+
 ## Content and launch settings
 
 - The site is a **local review build**, not a public deployment. `noindex,nofollow` is deliberately enabled until business details and publication are approved.
