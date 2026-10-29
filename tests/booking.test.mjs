@@ -104,3 +104,26 @@ test('a free-slots failure during book is logged with its own label',async()=>{
   const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,log:{error:(...a)=>errors.push(a.join(' '))}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1},ip:'1'},res);
   assert.equal(res.code,502);assert.ok(errors[0].includes('free-slots'),errors[0]);
 });
+
+/* Security review #4: one in-flight refresh at a time, and forced refreshes throttled. */
+test('concurrent gets share one free-slots call',async()=>{
+  const {ghl,calls}=fakeGhl();const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  await Promise.all([cache.get(),cache.get(),cache.get()]);
+  assert.equal(calls.free,1);
+});
+test('a second forced refresh inside 10 s is skipped',async()=>{
+  const {ghl,calls}=fakeGhl();let t=1000;const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>t,ttlMs:60_000});
+  await cache.get();await cache.refresh();assert.equal(calls.free,1);
+  t+=11_000;await cache.refresh();assert.equal(calls.free,2);
+});
+test('book rejects an expired token',async()=>{
+  const {ghl,calls}=fakeGhl();const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const old=signContact('wseU3X6FRfMhVno1u3Xk','s3cret',Date.now()-2*60*60*1000);
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true,secret:'s3cret',log:{warn:()=>{}}})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1,token:old},ip:'1'},res);
+  assert.equal(res.code,403);assert.equal(calls.create.length,0);
+});
+test('book rejects an unanchored startTime',async()=>{
+  const {ghl}=fakeGhl();const cache=makeSlotCache({ghl,calendarId:'cal1',now:()=>1,ttlMs:1000});
+  const res=fakeRes();await makeBookHandler({ghl,cache,calendarId:'cal1',allow:()=>true})({body:{contactId:'wseU3X6FRfMhVno1u3Xk',startTime:S1+'<script>'},ip:'1'},res);
+  assert.equal(res.code,400);
+});
