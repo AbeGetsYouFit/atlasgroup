@@ -67,7 +67,8 @@ export function captureMode(env){return env.GHL_PIT_TOKEN&&env.GHL_LOCATION_ID?'
 export function makeLeadHandler({ghl,allow,mode,log=console}){
   return async function handleLead(req,res){
     if(req.body?.website) return res.status(400).json({error:'rejected'});
-    if(!allow(req.ip)){log.warn('leads: rate-limited',req.ip);return res.status(429).json({error:'slow down'})}
+    const key=clientKey(req);
+    if(!allow(key)){log.warn('leads: rate-limited',key);return res.status(429).json({error:'slow down'})}
     if(mode==='off') return res.status(503).json({error:'lead capture not configured'});
     const checked=validateLead(req.body);
     if(checked.error) return res.status(400).json({error:checked.error});
@@ -84,3 +85,8 @@ export function makeLeadHandler({ghl,allow,mode,log=console}){
     }
   };
 }
+
+/* Rate-limit key. atlasgroupmi.com is proxied by Cloudflare in front of Render's proxy, so
+   req.ip (one trusted hop) is a Cloudflare edge address that changes per request. Cloudflare
+   sets CF-Connecting-IP to the real client; fall back to req.ip when it is absent (local dev). */
+export function clientKey(req){return (typeof req.get==='function'&&req.get('cf-connecting-ip'))||req.ip}
