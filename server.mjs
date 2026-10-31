@@ -52,9 +52,9 @@ app.post('/api/inquiries',async(req,res)=>{
   const reference=randomUUID();
   try {
     if(transport) {
-      await transport.sendMail({from:process.env.MAIL_FROM,to:process.env.INQUIRY_TO,replyTo:value.email,subject:`Atlas website inquiry: ${value.service}`,text:`Name: ${value.name}\nEmail: ${value.email}\nPhone: ${value.phone||'not provided'}\nService: ${value.service}${value.purpose?`
+      await transport.sendMail({from:process.env.MAIL_FROM,to:process.env.INQUIRY_TO,replyTo:value.email,subject:value.purpose?`Atlas website question: ${value.purpose}`:`Atlas website inquiry: ${value.service}`,text:`Name: ${value.name}\nEmail: ${value.email}\nPhone: ${value.phone||'not provided'}\nService: ${value.service}${value.purpose?`
 Purpose: ${value.purpose}`:''}\n\n${value.message}\n\nConsent: Contact about this inquiry only.\nSMS consent: ${value.smsConsent?'yes — may be texted':'no — do not text'}\nReference: ${reference}`});
-      res.status(201).json({mode:'email',message:'Your inquiry has been sent. Atlas will follow up using the email you provided.'});
+      res.status(201).json({mode:'email',message:value.purpose?'A licensed Atlas Benefits Coordinator will reach out within one business day, by phone or by the email you gave.':'Your inquiry has been sent. Atlas will follow up using the email you provided.'});
       /* after the response: the visitor never waits on GHL; completeInquiry never throws */
       if(ghl) void completeInquiry({ghl,value:{...value,page:req.body?.page}});
       return;
