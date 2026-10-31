@@ -201,3 +201,23 @@ test('impossible dates of birth are dropped, not sent',()=>{
   assert.equal(validateLead({...base,phone:'3136762298',dateOfBirth:'1800-01-01'}).error,'bad date of birth');
   assert.equal(validateLead({...base,phone:'3136762298',dateOfBirth:'1962-04-09'}).value.dateOfBirth,'1962-04-09');
 });
+
+/* Alert fields (Abe, 10-31): the owner text reads Source and Purpose from two contact fields,
+   because a text cannot read tags. "Website" for anything from the site, "Meta ad, {campaign}" for ads. */
+import {leadFields} from '../server/leads.mjs';
+test('leadFields: meta ad with campaign',()=>{
+  const {value}=validateLead({...base,page:'/start',phone:'3136762298',consent:true,purpose:'final-expense',utm:{source:'meta',campaign:'final-expense-oct',content:'ad-v17'}});
+  assert.deepEqual(leadFields(value),{lead_source:'Meta ad, final-expense-oct',purpose:'Final Expense'});
+});
+test('leadFields: website lead, purpose not given, plan from the URL fills in',()=>{
+  const {value}=validateLead({...base,page:'/start',phone:'3136762298',consent:true});
+  assert.deepEqual(leadFields(value),{lead_source:'Website',purpose:'not given'});
+  const {value:v2}=validateLead({...base,page:'/book',phone:'3136762298',consent:true,plan:'iul'});
+  assert.deepEqual(leadFields(v2),{lead_source:'Website',purpose:'Indexed Universal Life'});
+});
+test('handler writes the two fields on the upsert',async()=>{
+  const {ghl,calls}=fakeGhl();const {log}=fakeLog();const res=fakeRes();
+  await makeLeadHandler({ghl,allow:()=>true,mode:'ghl',log})({body:{...good,purpose:'other'},ip:'1.1.1.1'},res);
+  assert.equal(res.code,201);
+  assert.deepEqual(calls.upsert[0].customFields,[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:'Something else'}]);
+});

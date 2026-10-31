@@ -20,7 +20,7 @@ export function makeGhlClient({token,locationId,fetch=globalThis.fetch,timeoutMs
     return text?JSON.parse(text):{};
   }
   return {
-    async upsertContact({firstName,lastName,email,phone,tags,source='atlasgroupmi.com',dateOfBirth}){
+    async upsertContact({firstName,lastName,email,phone,tags,source='atlasgroupmi.com',dateOfBirth,customFields}){
       const payload={locationId,source};
       if(firstName) payload.firstName=firstName;
       if(lastName) payload.lastName=lastName;
@@ -28,6 +28,7 @@ export function makeGhlClient({token,locationId,fetch=globalThis.fetch,timeoutMs
       if(phone) payload.phone='+1'+String(phone).replace(/\D/g,'').slice(-10);
       if(tags?.length) payload.tags=tags;
       if(dateOfBirth) payload.dateOfBirth=dateOfBirth;
+      if(customFields?.length) payload.customFields=customFields;
       const r=await request('POST','/contacts/upsert',payload);
       const id=r.contact?.id??r.id;
       if(!id) throw new GhlError(200,JSON.stringify(r),'/contacts/upsert (no contact id in body)');

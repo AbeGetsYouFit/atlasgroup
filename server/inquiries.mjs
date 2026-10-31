@@ -65,7 +65,7 @@ export async function completeInquiry({ghl,value,log=console}) {
     const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
     const tags=['lead','inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
     const [firstName='',...rest]=String(value.name).trim().split(/\s+/);
-    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags});
+    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags,customFields:[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:value.service}]});
     await ghl.removeTags(id,['partial-lead',oppositeConsentTag(tags)]);
   } catch (err) {
     log.error('inquiries: GHL completion failed',err.status??'',err.body??err.message);

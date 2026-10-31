@@ -44,6 +44,19 @@ export function validateLead(input){
   return {value};
 }
 
+/* Owner-alert fields (Abe, 10-31). A text cannot read tags, so Source and Purpose are written
+   to two contact fields and the alert templates merge them. "Website" for anything from the
+   site, "Meta ad, {campaign}" for ad clicks. Purpose falls back to the plan carried in the ad URL,
+   then to "not given" so the line never vanishes from the alert. */
+export const purposeLabels={'final-expense':'Final Expense','income-replacement':'Income Replacement','mortgage-protection':'Mortgage Protection',other:'Something else'};
+export const planLabels={'final-expense':'Final Expense','income-replacement':'Income Replacement','mortgage-protection':'Mortgage Protection','whole-life':'Whole Life',iul:'Indexed Universal Life'};
+export function leadFields(v){
+  const lead_source=v.utm.source==='meta'?'Meta ad, '+(v.utm.campaign||'campaign not set'):'Website';
+  const purpose=purposeLabels[v.purpose]||planLabels[v.plan]||'not given';
+  return {lead_source,purpose};
+}
+export function toCustomFields(fields){return Object.entries(fields).map(([key,field_value])=>({key,field_value}))}
+
 export function leadTags(v){
   const tags=[v.stage==='reachout'?'lead':'partial-lead','src-'+pages[v.page]];
   if(v.service) tags.push('service-'+slugify(v.service));
@@ -108,7 +121,7 @@ export function makeLeadHandler({ghl,allow,mode,log=console,secret=''}){
     if(mode==='preview'){log.info('leads: preview capture',{...value,tags});return res.status(202).json({preview:true})}
     let id;
     try{
-      ({id}=await ghl.upsertContact({firstName:value.firstName,lastName:value.lastName,email:value.email,phone:value.phone,tags,dateOfBirth:value.dateOfBirth}));
+      ({id}=await ghl.upsertContact({firstName:value.firstName,lastName:value.lastName,email:value.email,phone:value.phone,tags,dateOfBirth:value.dateOfBirth,customFields:toCustomFields(leadFields(value))}));
     }catch(err){
       log.error('leads: GHL upsert failed',err.status??'',String(err.body??err.message).slice(0,300));
       return res.status(502).json({ok:false});

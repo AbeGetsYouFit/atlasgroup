@@ -87,3 +87,11 @@ test('completion removes the opposite consent tag',async()=>{
   assert.ok(calls.removeTags[0][1].includes('partial-lead'));
   assert.ok(calls.removeTags[0][1].includes('sms-consent-yes'));
 });
+
+test('completion writes Source=Website and Purpose=service on the upsert',async()=>{
+  const seen=[];
+  const ghl={async upsertContact(p){seen.push(p);return {id:'c9',isNew:false}},async removeTags(){}};
+  const {value}=validateInquiry({...valid,service:'Insurance'});
+  await completeInquiry({ghl,value:{...value,page:'/insurance'},log:{error:()=>{}}});
+  assert.deepEqual(seen[0].customFields,[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:'Insurance'}]);
+});

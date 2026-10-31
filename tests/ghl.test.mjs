@@ -83,3 +83,12 @@ test('createAppointment throws GhlError when the 2xx body has no id',async()=>{
   const ghl=makeGhlClient({token:'tok',locationId:'loc1',fetch});
   await assert.rejects(()=>ghl.createAppointment({calendarId:'c',contactId:'x',startTime:'2026-10-30T10:00:00-04:00',title:'t'}),e=>e instanceof GhlError&&/no appointment id/.test(e.message));
 });
+
+test('upsertContact passes customFields through untouched',async()=>{
+  const {fetch,calls}=fakeFetch(200,{contact:{id:'c1'},new:false});
+  const ghl=makeGhlClient({token:'tok',locationId:'loc1',fetch});
+  await ghl.upsertContact({phone:'3136762298',customFields:[{key:'lead_source',field_value:'Website'}]});
+  assert.deepEqual(JSON.parse(calls[0].init.body).customFields,[{key:'lead_source',field_value:'Website'}]);
+  await ghl.upsertContact({phone:'3136762298'});
+  assert.equal('customFields' in JSON.parse(calls[1].init.body),false);
+});
