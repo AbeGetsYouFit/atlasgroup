@@ -46,12 +46,12 @@ export function validateLead(input){
 
 /* Owner-alert fields (Abe, 10-31). A text cannot read tags, so Source and Purpose are written
    to two contact fields and the alert templates merge them. "Website" for anything from the
-   site, "Meta ad, {campaign}" for ad clicks. Purpose falls back to the plan carried in the ad URL,
+   site, "Meta Ads, {ad variant}" for ad clicks (Abe: the variant, not the campaign). Purpose falls back to the plan carried in the ad URL,
    then to "not given" so the line never vanishes from the alert. */
 export const purposeLabels={'final-expense':'Final Expense','income-replacement':'Income Replacement','mortgage-protection':'Mortgage Protection',other:'Something else'};
 export const planLabels={'final-expense':'Final Expense','income-replacement':'Income Replacement','mortgage-protection':'Mortgage Protection','whole-life':'Whole Life',iul:'Indexed Universal Life'};
 export function leadFields(v){
-  const lead_source=v.utm.source==='meta'?'Meta ad, '+(v.utm.campaign||'campaign not set'):'Website';
+  const lead_source=v.utm.source==='meta'?'Meta Ads'+(v.utm.content?', '+v.utm.content:''):'Website';
   const purpose=purposeLabels[v.purpose]||planLabels[v.plan]||'not given';
   return {lead_source,purpose};
 }

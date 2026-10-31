@@ -207,7 +207,9 @@ test('impossible dates of birth are dropped, not sent',()=>{
 import {leadFields} from '../server/leads.mjs';
 test('leadFields: meta ad with campaign',()=>{
   const {value}=validateLead({...base,page:'/start',phone:'3136762298',consent:true,purpose:'final-expense',utm:{source:'meta',campaign:'final-expense-oct',content:'ad-v17'}});
-  assert.deepEqual(leadFields(value),{lead_source:'Meta ad, final-expense-oct',purpose:'Final Expense'});
+  assert.deepEqual(leadFields(value),{lead_source:'Meta Ads, ad-v17',purpose:'Final Expense'});
+  const {value:noAd}=validateLead({...base,page:'/start',phone:'3136762298',consent:true,utm:{source:'meta'}});
+  assert.equal(leadFields(noAd).lead_source,'Meta Ads');
 });
 test('leadFields: website lead, purpose not given, plan from the URL fills in',()=>{
   const {value}=validateLead({...base,page:'/start',phone:'3136762298',consent:true});
