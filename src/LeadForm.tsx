@@ -17,7 +17,7 @@ function load():LeadFormValues{try{const raw=sessionStorage.getItem(STORAGE_KEY)
 function save(v:LeadFormValues){try{sessionStorage.setItem(STORAGE_KEY,JSON.stringify(v))}catch{/* private mode */}}
 
 export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVariant;page:'/book'|'/start';plan?:string;onCaptured:(contactId:string|null,fields:LeadFormValues,token:string|null)=>void}){
-  const [v,setV]=useState<LeadFormValues>(()=>({veteran:false,policyHolder:false,purpose:'final-expense',state:'MI',...load()}));
+  const [v,setV]=useState<LeadFormValues>(()=>({veteran:false,policyHolder:false,purpose:'',state:'MI',...load()}));
   const [busy,setBusy]=useState(false);
   const lead=useLeadCapture({page,stage:'partial'});
   useEffect(()=>{save(v)},[v]);
@@ -31,10 +31,13 @@ export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVari
     setBusy(false);onCaptured(contactId??null,v,token??null);
   }
   const consent=<label className="consent lead-consent"><input type="checkbox" required checked={v.consent===true} onChange={e=>{setV(p=>({...p,consent:e.target.checked}));}}/><span>I agree to be contacted by Atlas Insurances LLC about my inquiry. See our <Link to="/privacy">Privacy Policy</Link> and <Link to="/terms">Terms</Link>.</span></label>;
+  /* Abe, 10-31: nothing pre-selected, and the booking page asks the same question so Purpose reaches the alert. */
+  const purposeField=<fieldset className="lead-purpose"><legend>What is this for?</legend>{PURPOSES.map(([slug,title,sub])=><label key={slug} className={v.purpose===slug?'is-on':''}><input type="radio" name="purpose" value={slug} checked={v.purpose===slug} onChange={()=>setV(p=>({...p,purpose:slug}))} onBlur={blur}/><span><strong>{title}</strong><small>{sub}</small></span></label>)}</fieldset>;
   if(variant==='book') return <form className="lead-form" onSubmit={submit} noValidate={false}>
     <div className="lead-pair"><label>First name<input name="first_name" autoComplete="given-name" required maxLength={60} value={v.firstName??''} onChange={set('firstName')} onBlur={blur}/></label><label>Last name<input name="last_name" autoComplete="family-name" required maxLength={60} value={v.lastName??''} onChange={set('lastName')} onBlur={blur}/></label></div>
     <label>Mobile number<input name="phone" autoComplete="tel" type="tel" inputMode="tel" required maxLength={20} placeholder="(313) 555-0100" value={v.phone??''} onChange={set('phone')} onBlur={blur}/><span className="field-help">This is the number your Coordinator calls</span></label>
     <label>Email<input name="email" autoComplete="email" type="email" required maxLength={254} placeholder="you@example.com" value={v.email??''} onChange={set('email')} onBlur={blur}/></label>
+    {purposeField}
     {consent}
     <button className="button lead-submit" type="submit" disabled={busy}>{busy?<>One moment<LoaderCircle className="spinner" size={20}/></>:<>Show available times<ArrowUpRight size={22}/></>}</button>
     <p className="form-note">Step 2: pick a time. Your Coordinator calls you right then.</p>
@@ -47,7 +50,7 @@ export function LeadForm({variant,page,plan='',onCaptured}:{variant:LeadFormVari
       <div className="lead-toggle"><span>Veteran?</span><div className="toggle-pair" role="group" aria-label="Veteran"><button type="button" className={v.veteran===true?'is-on':''} onClick={()=>setV(p=>({...p,veteran:true}))}>Yes</button><button type="button" className={v.veteran!==true?'is-on':''} onClick={()=>setV(p=>({...p,veteran:false}))}>No</button></div></div>
       <div className="lead-toggle"><span>Current policy holder?</span><div className="toggle-pair" role="group" aria-label="Current policy holder"><button type="button" className={v.policyHolder===true?'is-on':''} onClick={()=>setV(p=>({...p,policyHolder:true}))}>Yes</button><button type="button" className={v.policyHolder!==true?'is-on':''} onClick={()=>setV(p=>({...p,policyHolder:false}))}>No</button></div></div>
     </div>
-    <fieldset className="lead-purpose"><legend>Purpose</legend>{PURPOSES.map(([slug,title,sub])=><label key={slug} className={v.purpose===slug?'is-on':''}><input type="radio" name="purpose" value={slug} checked={v.purpose===slug} onChange={()=>setV(p=>({...p,purpose:slug}))}/><span><strong>{title}</strong><small>{sub}</small></span></label>)}</fieldset>
+    {purposeField}
     {consent}
     <button className="button lead-submit" type="submit" disabled={busy}>{busy?<>One moment<LoaderCircle className="spinner" size={20}/></>:<>Have a Coordinator reach out<ArrowUpRight size={22}/></>}</button>
     <p className="form-note">No quote is given on this page. You can pick the time of the call on the next step.</p>
