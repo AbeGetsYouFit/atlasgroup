@@ -88,7 +88,7 @@ export function ContactSection({initialService='Not sure yet',standalone=false,p
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();lead.cancel();const fd=new FormData(e.currentTarget);setStatus('sending');setFeedback('');
   try{
-   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website'),page})});
+   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),purpose:fd.get('purpose'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website'),page})});
    const result=await response.json();if(!response.ok)throw new Error(result.error||'Something went wrong. Please try again.');
    setStatus('success');setFeedback(result.message);
    requestAnimationFrame(()=>statusRef.current?.focus());
@@ -100,7 +100,9 @@ export function ContactSection({initialService='Not sure yet',standalone=false,p
   </div>
   <div className="form-wrap">{status==='success'?<div className="form-success" ref={statusRef} tabIndex={-1} role="status"><Check size={36} strokeWidth={1.5}/><h3>{config?.inquiryMode==='preview'?'Your preview inquiry is saved.':'Your next chapter starts here.'}</h3><p>{feedback}</p><button className="button button-white" onClick={()=>{setStatus('idle');setFeedback('')}}>Start another inquiry<ArrowRight size={20}/></button></div>:<form ref={formRef} onSubmit={submit}>
    <div className="form-pair"><label>Name<input name="name" autoComplete="name" required maxLength={100} placeholder="Your name" onChange={captureForm}/></label><label>Email<input name="email" autoComplete="email" type="email" required maxLength={254} placeholder="you@example.com" onBlur={captureForm}/></label></div>
-   <label>What can we help with?<span className="select-wrap"><select name="service" value={selected} onChange={e=>{setSelected(e.target.value);captureForm(e)}} required>{divisions.map(d=><option key={d.service} value={d.service}>{d.service} — {d.brand}</option>)}<option>Not sure yet</option></select><ChevronDown size={18}/></span></label>
+   {page==='/insurance'
+    ?<><input type="hidden" name="service" value="Insurance"/><label>What is this for?<span className="select-wrap"><select name="purpose" defaultValue="" required onChange={captureForm}><option value="" disabled>Choose one</option><option>Final Expense</option><option>Income Replacement</option><option>Mortgage Protection</option><option>Something else</option></select><ChevronDown size={18}/></span></label></>
+    :<label>What can we help with?<span className="select-wrap"><select name="service" value={selected} onChange={e=>{setSelected(e.target.value);captureForm(e)}} required>{divisions.map(d=><option key={d.service} value={d.service}>{d.service} — {d.brand}</option>)}<option>Not sure yet</option></select><ChevronDown size={18}/></span></label>}
    <label>Your message<textarea name="message" rows={3} required maxLength={3000} placeholder="A little about your plans and timeline…"/></label>
    <div className="honey" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off"/></label></div>
    <label className="consent"><input type="checkbox" name="consent" required onChange={captureForm}/><span>I agree to be contacted about this inquiry and have read the <Link to="/privacy">privacy notice</Link>.</span></label>

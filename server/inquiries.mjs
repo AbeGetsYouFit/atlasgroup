@@ -1,5 +1,7 @@
 import {oppositeConsentTag} from '../shared/consent.mjs';
 export const services = ['Real estate','Insurance','Mortgages','Construction','Not sure yet'];
+/* /insurance question form asks what the coverage is for; Purpose on the contact carries it (Abe, 10-31). */
+export const purposes = ['Final Expense','Income Replacement','Mortgage Protection','Something else'];
 export const mailVars = ['SMTP_HOST','SMTP_USER','SMTP_PASS','INQUIRY_TO','MAIL_FROM'];
 export const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -20,6 +22,7 @@ export function validateInquiry(input) {
   if (error) return {error};
   value.phone = phone;
   value.smsConsent = input.smsConsent === true && phone !== '';
+  value.purpose = purposes.includes(input.purpose) ? input.purpose : '';
   return {value};
 }
 
@@ -65,7 +68,7 @@ export async function completeInquiry({ghl,value,log=console}) {
     const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
     const tags=['lead','inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
     const [firstName='',...rest]=String(value.name).trim().split(/\s+/);
-    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags,customFields:[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:value.service}]});
+    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags,customFields:[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:value.purpose||value.service}]});
     await ghl.removeTags(id,['partial-lead',oppositeConsentTag(tags)]);
   } catch (err) {
     log.error('inquiries: GHL completion failed',err.status??'',err.body??err.message);

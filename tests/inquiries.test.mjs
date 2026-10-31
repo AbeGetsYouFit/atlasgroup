@@ -95,3 +95,18 @@ test('completion writes Source=Website and Purpose=service on the upsert',async(
   await completeInquiry({ghl,value:{...value,page:'/insurance'},log:{error:()=>{}}});
   assert.deepEqual(seen[0].customFields,[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:'Insurance'}]);
 });
+
+/* /insurance question form (Abe, 10-31): the dropdown there asks what the coverage is for, so
+   Purpose carries the real answer instead of the company name. */
+test('purpose is accepted from the four choices and dropped otherwise',()=>{
+  assert.equal(validateInquiry({...valid,service:'Insurance',purpose:'Mortgage Protection'}).value.purpose,'Mortgage Protection');
+  assert.equal(validateInquiry({...valid,service:'Insurance',purpose:'<script>'}).value.purpose,'');
+  assert.equal(validateInquiry({...valid}).value.purpose,'');
+});
+test('completion writes Purpose from purpose when given, else from service',async()=>{
+  const seen=[];
+  const ghl={async upsertContact(p){seen.push(p);return {id:'c9',isNew:false}},async removeTags(){}};
+  const {value}=validateInquiry({...valid,service:'Insurance',purpose:'Income Replacement'});
+  await completeInquiry({ghl,value:{...value,page:'/insurance'},log:{error:()=>{}}});
+  assert.deepEqual(seen[0].customFields,[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:'Income Replacement'}]);
+});
