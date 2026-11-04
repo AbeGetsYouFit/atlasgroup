@@ -12,7 +12,8 @@ export function useLeadCapture({page,stage,debounceMs=2000}:{page:string;stage:C
   const pending=useRef<LeadFields|null>(null);
   const [contactId,setContactId]=useState<string|null>(null);
   const [token,setToken]=useState<string|null>(null);
-  const utm=useRef(typeof window==='undefined'?{source:'',campaign:'',content:'',plan:''}:rememberUtm(window.location.search,visitStorage()));
+  const [initialUtm]=useState(()=>typeof window==='undefined'?{source:'',campaign:'',content:'',plan:''}:rememberUtm(window.location.search,visitStorage()));
+  const utm=useRef(initialUtm);
 
   const post=useCallback(async(fields:LeadFields,extraStage?:CaptureStage):Promise<{contactId?:string;token?:string}>=>{
     const payload=buildLeadPayload(fields,{page,stage:extraStage??stage,utm:utm.current});

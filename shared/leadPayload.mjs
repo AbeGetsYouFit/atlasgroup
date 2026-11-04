@@ -42,11 +42,12 @@ export function readUtm(search){
 const UTM_KEY='atlas_utm';
 export function rememberUtm(search,storage){
   const now=readUtm(search);
-  const has=now.source||now.campaign||now.content||now.plan;
+  /* only a real ad UTM is a new click; ?plan= is also set by the site's own plan-card links */
+  const has=now.source||now.campaign||now.content;
   try{
     if(has){storage?.setItem(UTM_KEY,JSON.stringify(now));return now}
     const saved=storage?.getItem(UTM_KEY);
-    if(saved){const o=JSON.parse(saved);return {source:String(o.source||''),campaign:String(o.campaign||''),content:String(o.content||''),plan:String(o.plan||'')}}
+    if(saved){const o=JSON.parse(saved)||{};return {source:String(o.source||''),campaign:String(o.campaign||''),content:String(o.content||''),plan:now.plan||String(o.plan||'')}}
   }catch{/* fall through to the URL's own values */}
   return now;
 }

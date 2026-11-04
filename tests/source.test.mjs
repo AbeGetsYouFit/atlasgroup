@@ -44,3 +44,10 @@ test('inquiry without utm still says Website',async()=>{
   assert.equal(seen[0].customFields.find(f=>f.key==='lead_source').field_value,'Website');
   assert.ok(!seen[0].tags.includes('src-meta'));
 });
+test('an internal ?plan= link keeps the remembered ad source (review HIGH, 11-04)',()=>{
+  const s=memStore();
+  rememberUtm('?utm_source=meta&utm_campaign=vet&utm_content=v17',s);
+  const onBook=rememberUtm('?plan=iul',s);
+  assert.equal(onBook.source,'meta'); assert.equal(onBook.content,'v17'); assert.equal(onBook.plan,'iul');
+  assert.equal(rememberUtm('',s).source,'meta');
+});
