@@ -34,3 +34,19 @@ export function readUtm(search){
   const get=k=>(q.get(k)||'').trim().slice(0,200);
   return {source:get('utm_source'),campaign:get('utm_campaign'),content:get('utm_content'),plan:get('plan')};
 }
+
+/* The ad's UTM rides only on the landing URL. A visitor who lands on /start from an ad and then
+   uses the form on /insurance would otherwise be recorded as "Website". Keep the first-seen UTM
+   for the visit (sessionStorage); a new click with its own UTM replaces it. Storage blocked or
+   throwing -> fall back to the current URL only, never break the form. */
+const UTM_KEY='atlas_utm';
+export function rememberUtm(search,storage){
+  const now=readUtm(search);
+  const has=now.source||now.campaign||now.content||now.plan;
+  try{
+    if(has){storage?.setItem(UTM_KEY,JSON.stringify(now));return now}
+    const saved=storage?.getItem(UTM_KEY);
+    if(saved){const o=JSON.parse(saved);return {source:String(o.source||''),campaign:String(o.campaign||''),content:String(o.content||''),plan:String(o.plan||'')}}
+  }catch{/* fall through to the URL's own values */}
+  return now;
+}

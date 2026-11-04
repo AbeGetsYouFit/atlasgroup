@@ -4,3 +4,4 @@ export type LeadCtx={page:string;stage:'partial'|'book'|'reachout';utm?:Partial<
 export function buildLeadPayload(fields:LeadFields,ctx:LeadCtx):Record<string,unknown>|null;
 export function fingerprint(payload:Record<string,unknown>|null):string;
 export function readUtm(search:string):LeadUtm;
+export function rememberUtm(search:string,storage:Pick<Storage,'getItem'|'setItem'>|null|undefined):LeadUtm;

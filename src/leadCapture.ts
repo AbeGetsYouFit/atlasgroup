@@ -1,5 +1,5 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
-import {buildLeadPayload,fingerprint,readUtm,type LeadFields,type LeadCtx} from '../shared/leadPayload.mjs';
+import {buildLeadPayload,fingerprint,rememberUtm,type LeadFields,type LeadCtx} from '../shared/leadPayload.mjs';
 
 /* Progressive lead capture. `capture` is called on blur/change and posts to /api/leads
    2 s after the last change, only when the payload is sendable and differs from the last
@@ -12,7 +12,7 @@ export function useLeadCapture({page,stage,debounceMs=2000}:{page:string;stage:C
   const pending=useRef<LeadFields|null>(null);
   const [contactId,setContactId]=useState<string|null>(null);
   const [token,setToken]=useState<string|null>(null);
-  const utm=useRef(typeof window==='undefined'?{source:'',campaign:'',content:'',plan:''}:readUtm(window.location.search));
+  const utm=useRef(typeof window==='undefined'?{source:'',campaign:'',content:'',plan:''}:rememberUtm(window.location.search,visitStorage()));
 
   const post=useCallback(async(fields:LeadFields,extraStage?:CaptureStage):Promise<{contactId?:string;token?:string}>=>{
     const payload=buildLeadPayload(fields,{page,stage:extraStage??stage,utm:utm.current});
@@ -48,3 +48,6 @@ export function formFields(form:HTMLFormElement):LeadFields{
   const s=(k:string)=>{const v=fd.get(k);return typeof v==='string'?v:''};
   return {name:s('name'),email:s('email'),phone:s('phone'),service:s('service'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on'};
 }
+
+/* sessionStorage can throw on access (privacy modes, blocked storage); the form must still work. */
+export function visitStorage():Storage|null{try{return window.sessionStorage}catch{return null}}

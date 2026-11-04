@@ -1,5 +1,6 @@
 import { useEffect,useRef,useState,type FormEvent } from 'react';
-import {useLeadCapture,formFields} from './leadCapture';
+import {useLeadCapture,formFields,visitStorage} from './leadCapture';
+import {rememberUtm} from '../shared/leadPayload.mjs';
 import { Link,useLocation } from 'react-router-dom';
 import { ArrowUpRight,ArrowRight,ChevronDown,Menu,X,Check,LoaderCircle } from 'lucide-react';
 import {divisions,founder,type Division,asset} from './content';
@@ -89,7 +90,7 @@ export function ContactSection({initialService='Not sure yet',standalone=false,p
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();lead.cancel();const fd=new FormData(e.currentTarget);setStatus('sending');setFeedback('');
   try{
-   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),purpose:fd.get('purpose'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website'),page})});
+   const response=await fetch('/api/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),service:fd.get('service'),purpose:fd.get('purpose'),message:fd.get('message'),consent:fd.get('consent')==='on',smsConsent:fd.get('smsConsent')==='on',website:fd.get('website'),page,utm:rememberUtm(window.location.search,visitStorage())})});
    const result=await response.json();if(!response.ok)throw new Error(result.error||'Something went wrong. Please try again.');
    setStatus('success');setFeedback(result.message);
    requestAnimationFrame(()=>statusRef.current?.focus());

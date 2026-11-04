@@ -1,4 +1,5 @@
 import {oppositeConsentTag} from '../shared/consent.mjs';
+import {cleanUtm,sourceTags,leadSourceLabel} from '../shared/source.mjs';
 export const services = ['Real estate','Insurance','Mortgages','Construction','Not sure yet'];
 /* /insurance question form asks what the coverage is for; Purpose on the contact carries it (Abe, 10-31). */
 export const purposes = ['Final Expense','Income Replacement','Mortgage Protection','Something else'];
@@ -23,6 +24,8 @@ export function validateInquiry(input) {
   value.phone = phone;
   value.smsConsent = input.smsConsent === true && phone !== '';
   value.purpose = purposes.includes(input.purpose) ? input.purpose : '';
+  /* ad source carried from the landing URL; bad values are dropped, never the inquiry */
+  value.utm = cleanUtm(input.utm);
   return {value};
 }
 
@@ -66,9 +69,9 @@ const pageSlugs={'/':'home-form','/insurance':'insurance-form','/contact':'conta
 export async function completeInquiry({ghl,value,log=console}) {
   try {
     const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-    const tags=['lead','inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no'];
+    const tags=['lead','inquiry-complete','src-'+(pageSlugs[value.page]||'contact-form'),'service-'+slug(value.service),value.smsConsent&&value.phone?'sms-consent-yes':'sms-consent-no',...sourceTags(value.utm||cleanUtm(null))];
     const [firstName='',...rest]=String(value.name).trim().split(/\s+/);
-    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags,customFields:[{key:'lead_source',field_value:'Website'},{key:'purpose',field_value:value.purpose||value.service}]});
+    const {id}=await ghl.upsertContact({firstName,lastName:rest.join(' '),email:value.email,phone:value.phone,tags,customFields:[{key:'lead_source',field_value:leadSourceLabel(value.utm||cleanUtm(null))},{key:'purpose',field_value:value.purpose||value.service}]});
     await ghl.removeTags(id,['partial-lead',oppositeConsentTag(tags)]);
   } catch (err) {
     log.error('inquiries: GHL completion failed',err.status??'',err.body??err.message);

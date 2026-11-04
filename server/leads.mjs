@@ -1,5 +1,6 @@
 import {normalisePhone,emailRe,services} from './inquiries.mjs';
 import {slugify} from '../shared/slug.mjs';
+import {cleanUtm,sourceTags,leadSourceLabel} from '../shared/source.mjs';
 import {BlockList} from 'node:net';
 import {createHmac,timingSafeEqual} from 'node:crypto';
 
@@ -40,7 +41,7 @@ export function validateLead(input){
     consent:input.consent===true,
     /* SMS consent only counts alongside the general consent in the same payload (security review #1) */
     smsConsent:input.smsConsent===true&&input.consent===true,
-    utm:{source:slugify(str(utmIn.source,80)),campaign:slugify(str(utmIn.campaign,200)),content:slugify(str(utmIn.content,200))}};
+    utm:cleanUtm(utmIn)};
   return {value};
 }
 
@@ -51,7 +52,7 @@ export function validateLead(input){
 export const purposeLabels={'final-expense':'Final Expense','income-replacement':'Income Replacement','mortgage-protection':'Mortgage Protection',other:'Something else'};
 export const planLabels={'final-expense':'Final Expense','income-replacement':'Income Replacement','mortgage-protection':'Mortgage Protection','whole-life':'Whole Life',iul:'Indexed Universal Life'};
 export function leadFields(v){
-  const lead_source=v.utm.source==='meta'?'Meta Ads'+(v.utm.content?', '+v.utm.content:''):'Website';
+  const lead_source=leadSourceLabel(v.utm);
   const purpose=purposeLabels[v.purpose]||planLabels[v.plan]||'not given';
   return {lead_source,purpose};
 }
@@ -69,9 +70,7 @@ export function leadTags(v){
   if(v.stage==='book') tags.push('reached-calendar');
   if(v.stage==='reachout') tags.push('reachout');
   if(v.wantsCallback) tags.push('wants-callback');
-  if(v.utm.source==='meta') tags.push('src-meta');
-  if(v.utm.campaign) tags.push('campaign-'+v.utm.campaign);
-  if(v.utm.content) tags.push('ad-'+v.utm.content);
+  tags.push(...sourceTags(v.utm));
   return tags;
 }
 
